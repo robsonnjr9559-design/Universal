@@ -254,7 +254,6 @@
             hls: null, tsPlayer: null, video: null, url: null, retryCount: 0, monitorTimer: null, lastTime: 0, stallCount: 0,
             init: function() { 
                 this.video = document.getElementById('player'); 
-                this.video.onerror = function() { PlayerEngine.recover(); }; 
             },
             play: function(url, isLive) {
                 if(this.url === url && !this.video.paused) return;
@@ -264,27 +263,37 @@
                 if(isLive) { this.video.classList.add('live'); } 
                 else { this.video.classList.remove('live'); }
                 
+                // Desativa o erro global temporariamente para o navegador não criar o loop de 5s
+                this.video.onerror = null; 
+                
                 if (url.indexOf('.ts') > -1) {
-                    // Tenta rodar nativamente primeiro (Melhor para Smart TVs)
-                    this.video.src = url;
-                    this.video.play().catch(function(e) {
-                        console.log("Falha no TS nativo, tentando mpegts...", e);
-                        // Se a TV não suportar TS nativo, usa mpegts com buffer otimizado
-                        if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
-                            PlayerEngine.tsPlayer = mpegts.createPlayer({ 
-                                type: 'mse', isLive: isLive, url: url 
-                            }, {
-                                enableStashBuffer: true,
-                                stashInitialSize: 1024 * 1024, // Buffer maior para evitar engasgos
-                                liveBufferLatencyChasing: false // Desliga a perseguição agressiva do ao vivo
-                            });
-                            PlayerEngine.tsPlayer.attachMediaElement(PlayerEngine.video);
-                            PlayerEngine.tsPlayer.load();
-                            PlayerEngine.tsPlayer.play().catch(function(e){ console.log(e); });
-                        }
-                    });
+                    this.startMonitor(); 
+                    if (typeof mpegts !== 'undefined' && mpegts.getFeatureList().mseLivePlayback) {
+                        this.tsPlayer = mpegts.createPlayer({ 
+                            type: 'mse', isLive: isLive, url: url 
+                        }, {
+                            enableWorker: true, // Usa o núcleo secundário do processador para evitar lentidão
+                            enableStashBuffer: false, // Tira o delay gigante inicial
+                            liveBufferLatencyChasing: false, // Evita a aceleração da imagem que causava a fragmentação
+                            lazyLoad: false
+                        });
+                        this.tsPlayer.attachMediaElement(this.video);
+                        this.tsPlayer.load();
+                        this.tsPlayer.play().catch(function(){});
+
+                        // Dispara o erro apenas se o próprio tradutor falhar
+                        this.tsPlayer.on(mpegts.Events.ERROR, function() {
+                            PlayerEngine.recover();
+                        });
+                    } else {
+                        // Plano C
+                        this.video.onerror = function() { PlayerEngine.recover(); };
+                        this.video.src = url;
+                        this.video.play().catch(function(){});
+                    }
                 } else if (url.indexOf('.m3u8') > -1) {
                     this.startMonitor();
+                    this.video.onerror = function() { PlayerEngine.recover(); }; // Ativa o erro para o HLS
                     var canPlayNative = this.video.canPlayType('application/vnd.apple.mpegurl');
                     if (canPlayNative === "probably" || canPlayNative === "maybe") { 
                         this.video.src = url; 
@@ -293,25 +302,21 @@
                         this.startHls(url); 
                     } else { 
                         this.video.src = url; 
-                        this.video.play().catch(function(e) { console.log(e); }); 
+                        this.video.play().catch(function(){}); 
                     }
                 } else {
+                    this.video.onerror = function() { PlayerEngine.recover(); };
                     this.video.src = url;
-                    this.video.play().catch(function(e) { console.log(e); });
+                    this.video.play().catch(function(){});
                 }
             },
             startHls: function(url) {
                 if(this.hls) { this.hls.destroy(); }
                 var config = { 
-                    enableWorker: true, // Usa threads separadas se possível
-                    maxBufferLength: 30, // Aumentado para 30 segundos (evita travar em oscilações)
-                    maxMaxBufferLength: 60, 
-                    liveSyncDurationCount: 3, 
-                    manifestLoadingTimeOut: 20000, 
-                    manifestLoadingMaxRetry: -1, // -1 = Tentativas infinitas (não desiste de madrugada)
-                    manifestLoadingRetryDelay: 5000, 
-                    levelLoadingMaxRetry: -1, // Tentativas infinitas de carregar os fragmentos
-                    fragLoadingMaxRetry: -1 
+                    enableWorker: true, maxBufferLength: 30, maxMaxBufferLength: 60, 
+                    liveSyncDurationCount: 3, manifestLoadingTimeOut: 20000, 
+                    manifestLoadingMaxRetry: -1, manifestLoadingRetryDelay: 5000, 
+                    levelLoadingMaxRetry: -1, fragLoadingMaxRetry: -1 
                 };
                 this.hls = new Hls(config); this.hls.loadSource(url); this.hls.attachMedia(this.video);
                 this.hls.on(Hls.Events.MANIFEST_PARSED, function() { 
@@ -321,17 +326,9 @@
                 this.hls.on(Hls.Events.ERROR, function(event, data) {
                     if (data.fatal) { 
                         switch (data.type) {
-                            case Hls.ErrorTypes.NETWORK_ERROR: 
-                                console.log("HLS Network Error, recovering...");
-                                PlayerEngine.hls.startLoad(); 
-                                break;
-                            case Hls.ErrorTypes.MEDIA_ERROR: 
-                                console.log("HLS Media Error, recovering...");
-                                PlayerEngine.hls.recoverMediaError(); 
-                                break;
-                            default: 
-                                PlayerEngine.recover(); 
-                                break;
+                            case Hls.ErrorTypes.NETWORK_ERROR: PlayerEngine.hls.startLoad(); break;
+                            case Hls.ErrorTypes.MEDIA_ERROR: PlayerEngine.hls.recoverMediaError(); break;
+                            default: PlayerEngine.recover(); break;
                         }
                     }
                 });
@@ -342,14 +339,11 @@
                     var v = PlayerEngine.video; if(!v || !PlayerEngine.url || v.paused) return;
                     if(Math.abs(v.currentTime - PlayerEngine.lastTime) < 0.1) {
                         PlayerEngine.stallCount++;
-                        if(PlayerEngine.stallCount > 5) { 
+                        // Aumentado para 16 segundos de tolerância antes de forçar o reinício do canal
+                        if(PlayerEngine.stallCount > 8) { 
                             PlayerEngine.stallCount = 0; 
-                            if(PlayerEngine.hls) { 
-                                PlayerEngine.hls.recoverMediaError(); 
-                                PlayerEngine.hls.startLoad(); 
-                            } else { 
-                                PlayerEngine.recover(); 
-                            } 
+                            if(PlayerEngine.hls) { PlayerEngine.hls.recoverMediaError(); PlayerEngine.hls.startLoad(); } 
+                            else { PlayerEngine.recover(); } 
                         }
                     } else { PlayerEngine.stallCount = 0; PlayerEngine.lastTime = v.currentTime; PlayerEngine.retryCount = 0; }
                 }, 2000);
@@ -357,14 +351,8 @@
             stopMonitor: function() { if(this.monitorTimer) clearInterval(this.monitorTimer); },
             recover: function() {
                 this.retryCount++;
-                
-                // Se NÃO for ao vivo e já tentou 10 vezes, ele para.
-                // Mas se FOR ao vivo (TV), ele NUNCA desiste. Continua tentando reconectar.
                 if(this.retryCount > 10 && App.mode !== 'live') { this.stop(); return; }
-                
-                // Mostra um aviso visual rápido de que está reconectando
                 App.osd("RECONECTANDO...");
-
                 setTimeout(function(){ 
                     if(PlayerEngine.url && PlayerEngine.url.indexOf('.m3u8') > -1) { 
                         PlayerEngine.startHls(PlayerEngine.url); 
@@ -373,10 +361,11 @@
                         v.load(); 
                         PlayerEngine.play(PlayerEngine.url, App.mode === 'live'); 
                     } 
-                }, 5000); // Aguarda 5 segundos antes de tentar de novo para não derrubar sua própria internet
+                }, 5000);
             },
             stop: function() { 
                 this.stopMonitor(); 
+                this.video.onerror = null; 
                 if(this.hls) { try { this.hls.stopLoad(); this.hls.detachMedia(); this.hls.destroy(); } catch(e) {} this.hls = null; } 
                 if(this.tsPlayer) { try { this.tsPlayer.pause(); this.tsPlayer.unload(); this.tsPlayer.detachMediaElement(); this.tsPlayer.destroy(); } catch(e) {} this.tsPlayer = null; }
                 if(this.video) { 
@@ -385,7 +374,6 @@
                         var parent = this.video.parentNode; parent.removeChild(this.video);
                         var newVid = document.createElement('video'); newVid.id = 'player'; newVid.setAttribute('playsinline', ''); newVid.setAttribute('webkit-playsinline', '');
                         parent.insertBefore(newVid, parent.firstChild); this.video = newVid;
-                        this.video.onerror = function() { PlayerEngine.recover(); };
                         this.video.onended = function() { if (App.mode === 'live') { PlayerEngine.recover(); } else if (App.mode === 'series' && App.isFolder && App.idx < App.seriesEps.length-1) { App.idx++; App.updateFocus(); App.playStream(App.seriesEps[App.idx]); } else { App.exitFull(); } };
                     } catch(err) {}
                 } 
