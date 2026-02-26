@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     
-    <title>R&C GOLD PRO - Premium Edition</title>
+    <title>R&C GOLD PRO 👑 - Premium Edition</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -251,7 +251,9 @@
         };
 
         var PlayerEngine = {
-            hls: null, tsPlayer: null, video: null, url: null, retryCount: 0, monitorTimer: null, lastTime: 0, stallCount: 0,
+            hls: null, tsPlayer: null, video: null, url: null, retryCount: 0, monitorTimer: null, lastTime: 0, stallCount: 0, 
+            recoveryTimer: null, // <-- Variável nova para controlar o loop fantasma
+
             init: function() { 
                 this.video = document.getElementById('player'); 
             },
@@ -275,9 +277,8 @@
                             enableStashBuffer: false, 
                             liveBufferLatencyChasing: false, 
                             lazyLoad: false,
-                            /* --- LIMPEZA DE CACHE AUTOMÁTICA TS --- */
-                            autoCleanupSourceBuffer: true, // Ativa a auto-limpeza de RAM
-                            autoCleanupMaxBackwardDuration: 10, // Guarda no máximo 10 segs do passado
+                            autoCleanupSourceBuffer: true, 
+                            autoCleanupMaxBackwardDuration: 10, 
                             autoCleanupMinBackwardDuration: 5
                         });
                         this.tsPlayer.attachMediaElement(this.video);
@@ -317,8 +318,7 @@
                     enableWorker: true, 
                     maxBufferLength: 30, 
                     maxMaxBufferLength: 60, 
-                    /* --- LIMPEZA DE CACHE AUTOMÁTICA HLS --- */
-                    backBufferLength: 0, // Apaga da RAM na mesma hora os quadros de vídeo já assistidos
+                    backBufferLength: 0, 
                     liveSyncDurationCount: 3, 
                     manifestLoadingTimeOut: 20000, 
                     manifestLoadingMaxRetry: -1, 
@@ -360,8 +360,11 @@
                 this.retryCount++;
                 if(this.retryCount > 10 && App.mode !== 'live') { this.stop(); return; }
                 App.osd("RECONECTANDO...");
-                setTimeout(function(){ 
-                    if(PlayerEngine.url && PlayerEngine.url.indexOf('.m3u8') > -1) { 
+                
+                clearTimeout(this.recoveryTimer); // Limpa qualquer reconexão anterior que ficou presa
+                this.recoveryTimer = setTimeout(function(){ 
+                    if(!PlayerEngine.url) return; // Segurança: se a URL foi limpa, não tenta tocar nada
+                    if(PlayerEngine.url.indexOf('.m3u8') > -1) { 
                         PlayerEngine.startHls(PlayerEngine.url); 
                     } else { 
                         var v = document.getElementById('player'); 
@@ -372,6 +375,11 @@
             },
             stop: function() { 
                 this.stopMonitor(); 
+                clearTimeout(this.recoveryTimer); // Impede que a reconexão aconteça se você já mudou de tela
+                var osdEl = document.getElementById('osd');
+                if(osdEl) osdEl.style.display = 'none'; // Limpa o aviso da tela imediatamente
+                this.url = null; // Esquece o link do vídeo anterior
+
                 this.video.onerror = null; 
                 if(this.hls) { try { this.hls.stopLoad(); this.hls.detachMedia(); this.hls.destroy(); } catch(e) {} this.hls = null; } 
                 if(this.tsPlayer) { try { this.tsPlayer.pause(); this.tsPlayer.unload(); this.tsPlayer.detachMediaElement(); this.tsPlayer.destroy(); } catch(e) {} this.tsPlayer = null; }
