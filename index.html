@@ -8,7 +8,7 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#000000">
     
-    <title>R&C GOLD PRO 👑 - Premium Edition</title>
+    <title>R&C GOLD PRO - Premium Edition</title>
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;800&display=swap" rel="stylesheet">
     
@@ -263,7 +263,6 @@
                 if(isLive) { this.video.classList.add('live'); } 
                 else { this.video.classList.remove('live'); }
                 
-                // Desativa o erro global temporariamente para o navegador não criar o loop de 5s
                 this.video.onerror = null; 
                 
                 if (url.indexOf('.ts') > -1) {
@@ -272,28 +271,30 @@
                         this.tsPlayer = mpegts.createPlayer({ 
                             type: 'mse', isLive: isLive, url: url 
                         }, {
-                            enableWorker: true, // Usa o núcleo secundário do processador para evitar lentidão
-                            enableStashBuffer: false, // Tira o delay gigante inicial
-                            liveBufferLatencyChasing: false, // Evita a aceleração da imagem que causava a fragmentação
-                            lazyLoad: false
+                            enableWorker: true, 
+                            enableStashBuffer: false, 
+                            liveBufferLatencyChasing: false, 
+                            lazyLoad: false,
+                            /* --- LIMPEZA DE CACHE AUTOMÁTICA TS --- */
+                            autoCleanupSourceBuffer: true, // Ativa a auto-limpeza de RAM
+                            autoCleanupMaxBackwardDuration: 10, // Guarda no máximo 10 segs do passado
+                            autoCleanupMinBackwardDuration: 5
                         });
                         this.tsPlayer.attachMediaElement(this.video);
                         this.tsPlayer.load();
                         this.tsPlayer.play().catch(function(){});
 
-                        // Dispara o erro apenas se o próprio tradutor falhar
                         this.tsPlayer.on(mpegts.Events.ERROR, function() {
                             PlayerEngine.recover();
                         });
                     } else {
-                        // Plano C
                         this.video.onerror = function() { PlayerEngine.recover(); };
                         this.video.src = url;
                         this.video.play().catch(function(){});
                     }
                 } else if (url.indexOf('.m3u8') > -1) {
                     this.startMonitor();
-                    this.video.onerror = function() { PlayerEngine.recover(); }; // Ativa o erro para o HLS
+                    this.video.onerror = function() { PlayerEngine.recover(); }; 
                     var canPlayNative = this.video.canPlayType('application/vnd.apple.mpegurl');
                     if (canPlayNative === "probably" || canPlayNative === "maybe") { 
                         this.video.src = url; 
@@ -313,10 +314,17 @@
             startHls: function(url) {
                 if(this.hls) { this.hls.destroy(); }
                 var config = { 
-                    enableWorker: true, maxBufferLength: 30, maxMaxBufferLength: 60, 
-                    liveSyncDurationCount: 3, manifestLoadingTimeOut: 20000, 
-                    manifestLoadingMaxRetry: -1, manifestLoadingRetryDelay: 5000, 
-                    levelLoadingMaxRetry: -1, fragLoadingMaxRetry: -1 
+                    enableWorker: true, 
+                    maxBufferLength: 30, 
+                    maxMaxBufferLength: 60, 
+                    /* --- LIMPEZA DE CACHE AUTOMÁTICA HLS --- */
+                    backBufferLength: 0, // Apaga da RAM na mesma hora os quadros de vídeo já assistidos
+                    liveSyncDurationCount: 3, 
+                    manifestLoadingTimeOut: 20000, 
+                    manifestLoadingMaxRetry: -1, 
+                    manifestLoadingRetryDelay: 5000, 
+                    levelLoadingMaxRetry: -1, 
+                    fragLoadingMaxRetry: -1 
                 };
                 this.hls = new Hls(config); this.hls.loadSource(url); this.hls.attachMedia(this.video);
                 this.hls.on(Hls.Events.MANIFEST_PARSED, function() { 
@@ -339,7 +347,6 @@
                     var v = PlayerEngine.video; if(!v || !PlayerEngine.url || v.paused) return;
                     if(Math.abs(v.currentTime - PlayerEngine.lastTime) < 0.1) {
                         PlayerEngine.stallCount++;
-                        // Aumentado para 16 segundos de tolerância antes de forçar o reinício do canal
                         if(PlayerEngine.stallCount > 8) { 
                             PlayerEngine.stallCount = 0; 
                             if(PlayerEngine.hls) { PlayerEngine.hls.recoverMediaError(); PlayerEngine.hls.startLoad(); } 
