@@ -18,7 +18,6 @@
     <style>
         :root { --bg: #000000; --gold: #FFD700; --card-bg: #1a1a1a; --focus-bg: #FFD700; }
         
-        /* --- BLOQUEIO MÁXIMO DE SELEÇÃO E GESTOS --- */
         * { 
             margin: 0; 
             padding: 0; 
@@ -39,7 +38,6 @@
             -ms-user-select: auto;
             user-select: auto;
         }
-        /* ---------------------------------- */
         
         html, body {
             background-color: var(--bg); color: #fff; font-family: 'Montserrat', sans-serif;
@@ -53,7 +51,8 @@
 
         button, .smart-card, .cat-item, .item, .power-btn, .key, .toggle-btn { cursor: pointer; }
 
-        .cat-list, .item-list, .vid-box, video { transform: translateZ(0); will-change: transform; }
+        /* Otimização de VRAM: Removido o will-change e transform das listas */
+        .vid-box, video { transform: translateZ(0); }
 
         .focused { border: 3px solid #fff !important; background: var(--focus-bg) !important; color: #000 !important; z-index: 50; box-shadow: none !important; }
         #vid-box.focused { border: 4px solid var(--gold) !important; box-shadow: none !important; z-index: 60; }
@@ -102,7 +101,6 @@
         .cat-title-spacer { width: 32px; } 
         .cat-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
-        /* ADICIONADO TOUCH-ACTION NAS LISTAS PARA BLOQUEAR A PESQUISA NATIVA */
         .cat-item { padding: 12px 20px; border-bottom: 1px solid #1a1a1a; color: #999; font-size: 13px; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; touch-action: pan-y; }
         .cat-item.active { border-left: 5px solid var(--gold); background: #181818; color: #fff; }
 
@@ -111,14 +109,14 @@
         .inp-search { width: 100%; background: #222; border: 1px solid #333; color: #fff; padding: 10px; text-align: center; font-weight: bold; border-radius: 6px; text-transform: uppercase; font-size: 13px; }
         .item-list { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         
-        /* ADICIONADO TOUCH-ACTION NAS LISTAS PARA BLOQUEAR A PESQUISA NATIVA */
         .item { padding: 12px 20px; border-bottom: 1px solid #1a1a1a; color: #bbb; font-size: 14px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; display: block; touch-action: pan-y; }
         .item.playing { color: var(--gold); font-weight: bold; background: #181818; border-left: 3px solid var(--gold); }
         .fav-icon { float: right; color: var(--gold); margin-left: 10px; }
 
         .col-play { flex: 1; background: #000; display: flex; flex-direction: column; position: relative; height: 100%; }
-        .vid-box { width: 100%; height: 50vh; background: #000; position: relative; border-bottom: 2px solid #333; cursor: pointer; }
-        video { width: 100%; height: 100%; background: #000; object-fit: fill !important; }
+        
+        .vid-box { width: 100%; height: 50vh; background: #000; position: relative; border-bottom: 2px solid #333; cursor: pointer; overflow: hidden; }
+        video { width: 100%; height: 100%; background: #000; object-fit: fill !important; position: absolute; top: 0; left: 0; }
         
         .meta { padding: 20px; flex: 1; background: #080808; display: flex; flex-direction: column; overflow-y: auto; -webkit-overflow-scrolling: touch; }
         .meta-title { font-size: 20px; color: var(--gold); font-weight: 800; margin-bottom: 8px; display: flex; align-items: center; }
@@ -245,17 +243,23 @@
                 var idx = this.list.indexOf(id);
                 if(idx > -1) this.list.splice(idx, 1); else this.list.push(id);
                 localStorage.setItem(this.key, JSON.stringify(this.list));
-                if(App.idx < App.fullData.length) App.renderList(true);
+                App.renderList(true);
             },
             isFav: function(id) { return this.list.indexOf(id) > -1; }
         };
 
         var PlayerEngine = {
             hls: null, tsPlayer: null, video: null, url: null, retryCount: 0, monitorTimer: null, lastTime: 0, stallCount: 0, 
-            recoveryTimer: null, // <-- Variável nova para controlar o loop fantasma
+            recoveryTimer: null, 
 
             init: function() { 
                 this.video = document.getElementById('player'); 
+                this.video.onended = function() { 
+                    if (App.mode === 'live') { PlayerEngine.recover(); } 
+                    else if (App.mode === 'series' && App.isFolder && App.idx < App.seriesEps.length-1) { 
+                        App.idx++; App.updateFocus(); App.playStream(App.seriesEps[App.idx]); 
+                    } else { App.exitFull(); } 
+                };
             },
             play: function(url, isLive) {
                 if(this.url === url && !this.video.paused) return;
@@ -273,8 +277,9 @@
                         this.tsPlayer = mpegts.createPlayer({ 
                             type: 'mse', isLive: isLive, url: url 
                         }, {
-                            enableWorker: true, 
-                            enableStashBuffer: false, 
+                            enableWorker: false,
+                            enableStashBuffer: true, 
+                            stashInitialSize: 1024 * 1024, 
                             liveBufferLatencyChasing: false, 
                             lazyLoad: false,
                             autoCleanupSourceBuffer: true, 
@@ -314,10 +319,12 @@
             },
             startHls: function(url) {
                 if(this.hls) { this.hls.destroy(); }
+                // OTIMIZAÇÃO: Buffers reduzidos agressivamente para TVs
                 var config = { 
-                    enableWorker: true, 
-                    maxBufferLength: 30, 
-                    maxMaxBufferLength: 60, 
+                    enableWorker: false, 
+                    maxBufferLength: 10, 
+                    maxMaxBufferLength: 15, 
+                    maxBufferSize: 10 * 1000 * 1000, 
                     backBufferLength: 0, 
                     liveSyncDurationCount: 3, 
                     manifestLoadingTimeOut: 20000, 
@@ -361,9 +368,9 @@
                 if(this.retryCount > 10 && App.mode !== 'live') { this.stop(); return; }
                 App.osd("RECONECTANDO...");
                 
-                clearTimeout(this.recoveryTimer); // Limpa qualquer reconexão anterior que ficou presa
+                clearTimeout(this.recoveryTimer); 
                 this.recoveryTimer = setTimeout(function(){ 
-                    if(!PlayerEngine.url) return; // Segurança: se a URL foi limpa, não tenta tocar nada
+                    if(!PlayerEngine.url) return; 
                     if(PlayerEngine.url.indexOf('.m3u8') > -1) { 
                         PlayerEngine.startHls(PlayerEngine.url); 
                     } else { 
@@ -375,29 +382,29 @@
             },
             stop: function() { 
                 this.stopMonitor(); 
-                clearTimeout(this.recoveryTimer); // Impede que a reconexão aconteça se você já mudou de tela
+                clearTimeout(this.recoveryTimer); 
                 var osdEl = document.getElementById('osd');
-                if(osdEl) osdEl.style.display = 'none'; // Limpa o aviso da tela imediatamente
-                this.url = null; // Esquece o link do vídeo anterior
+                if(osdEl) osdEl.style.display = 'none'; 
+                this.url = null; 
 
                 this.video.onerror = null; 
                 if(this.hls) { try { this.hls.stopLoad(); this.hls.detachMedia(); this.hls.destroy(); } catch(e) {} this.hls = null; } 
                 if(this.tsPlayer) { try { this.tsPlayer.pause(); this.tsPlayer.unload(); this.tsPlayer.detachMediaElement(); this.tsPlayer.destroy(); } catch(e) {} this.tsPlayer = null; }
+                
+                // OTIMIZAÇÃO: Limpeza forçada de memória de vídeo
                 if(this.video) { 
-                    this.video.pause(); this.video.removeAttribute('src'); this.video.load(); 
-                    try {
-                        var parent = this.video.parentNode; parent.removeChild(this.video);
-                        var newVid = document.createElement('video'); newVid.id = 'player'; newVid.setAttribute('playsinline', ''); newVid.setAttribute('webkit-playsinline', '');
-                        parent.insertBefore(newVid, parent.firstChild); this.video = newVid;
-                        this.video.onended = function() { if (App.mode === 'live') { PlayerEngine.recover(); } else if (App.mode === 'series' && App.isFolder && App.idx < App.seriesEps.length-1) { App.idx++; App.updateFocus(); App.playStream(App.seriesEps[App.idx]); } else { App.exitFull(); } };
-                    } catch(err) {}
+                    this.video.pause(); 
+                    this.video.removeAttribute('src'); 
+                    this.video.srcObject = null;
+                    this.video.load(); 
                 } 
             }
         };
 
         var App = {
             scr: 0, zone: 0, idx: 0, lastCatIdx: 0, creds: {}, fullData: [], storedList: [], memIdx: 0, globalData: null, isFolder: false, seriesEps: [], playingId: null,
-            cfg: { filter: true, format: 'default' }, userInfo: null, lastEnter: 0, renderLimit: 50, touchTimer: null,
+            cfg: { filter: true, format: 'default' }, userInfo: null, lastEnter: 0, touchTimer: null,
+            page: 0, itemsPerPage: 50, // Variáveis de paginação real
 
             init: function() {
                 FavManager.init(); setInterval(function() { window.status = "keep_alive_" + new Date().getTime(); }, 40000);
@@ -405,10 +412,6 @@
                 if(localStorage.getItem('rc_cfg_format')) this.cfg.format = localStorage.getItem('rc_cfg_format');
                 this.updateCfgUI(); 
                 PlayerEngine.init();
-                
-                document.getElementById('player').onended = function() { 
-                    if (App.mode === 'live') { PlayerEngine.recover(); } else if (App.mode === 'series' && App.isFolder && App.idx < App.seriesEps.length-1) { App.idx++; App.updateFocus(); App.playStream(App.seriesEps[App.idx]); } else { App.exitFull(); }
-                };
                 
                 setInterval(this.updateClock, 1000); this.updateClock();
 
@@ -476,7 +479,7 @@
                 document.querySelectorAll('.layer').forEach(function(l){l.classList.add('hide')});
                 if(n===0) document.getElementById('login-layer').classList.remove('hide');
                 if(n===1) document.getElementById('dash-layer').classList.remove('hide');
-                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); document.getElementById('btn-back').classList.remove('hide'); this.renderLimit = 50; } 
+                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); document.getElementById('btn-back').classList.remove('hide'); this.page = 0; } 
                 else { var btn = document.getElementById('btn-back'); if(btn) btn.classList.add('hide'); }
                 if(n===3) document.getElementById('settings-layer').classList.remove('hide');
                 this.scr=n; this.zone=0; this.idx=0; this.updateFocus();
@@ -487,14 +490,17 @@
 
             openMode: function(m) {
                 PlayerEngine.stop(); this.resetInfo(); requestNativeFullscreen();
-                this.mode = m; this.setScr(2); this.isFolder = false; this.globalData = null; this.playingId = null;
+                
+                // OTIMIZAÇÃO: Limpa variáveis globais para liberar RAM
+                this.fullData = []; this.globalData = null; this.storedList = []; this.seriesEps = [];
+                this.mode = m; this.setScr(2); this.isFolder = false; this.playingId = null; this.page = 0;
+                
                 document.getElementById('cat-list').innerHTML = ''; document.getElementById('item-list').innerHTML = '';
                 document.getElementById('search').value = '';
 
                 var act = (m==='live')?'get_live_categories':(m==='movie'?'get_vod_categories':'get_series_categories');
                 this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+act, function(d){
                     if(d && d!=='ERR_NET') {
-                        // ADICIONADO role="button" e tabindex="-1" na geração da lista HTML
                         var h = '<div class="cat-item" role="button" tabindex="-1" id="c0" data-id="fav" onclick="App.catClick(0)">⭐ FAVORITOS</div>'; var count = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
                         for(var i=0;i<d.length;i++) {
                             var nome = d[i].category_name; var show = true;
@@ -516,9 +522,10 @@
             },
             
             resetInfo: function() { document.getElementById('meta-title').innerHTML = 'R&C GOLD PRO'; document.getElementById('meta-desc').innerText = ""; document.getElementById('meta-epg').innerText = ""; document.getElementById('meta-epg').classList.add('hide'); var v = document.getElementById('player'); v.removeAttribute('src'); v.load(); },
-            catClick: function(i) { this.idx=i; this.zone=0; this.renderLimit=50; this.loadContent(i); requestNativeFullscreen(); },
+            catClick: function(i) { this.idx=i; this.zone=0; this.loadContent(i); requestNativeFullscreen(); },
 
             loadContent: function(catIdx) {
+                this.page = 0; // Zera a paginação ao mudar de categoria
                 this.lastCatIdx = catIdx; var el = document.getElementById('c'+catIdx); if(!el) return;
                 var cid = el.getAttribute('data-id'); document.querySelectorAll('.cat-item').forEach(function(e){e.classList.remove('active')}); el.classList.add('active');
                 document.getElementById('search').value = ''; document.getElementById('item-list').innerHTML = '';
@@ -531,33 +538,48 @@
                 } else { this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actStr+"&category_id="+cid, onData); }
             },
 
+            // OTIMIZAÇÃO: Paginação real implementada
             renderList: function(keepIdx) {
                 var d = this.fullData; var max = d.length; if(max===0) { document.getElementById('item-list').innerHTML = '<div style="padding:20px;">Vazio</div>'; return; }
-                var limit = Math.min(max, this.renderLimit); var h = '';
-                for(var i=0; i<limit; i++) {
+                
+                var start = this.page * this.itemsPerPage;
+                var end = Math.min(start + this.itemsPerPage, max);
+                var h = '';
+                
+                if (this.page > 0) {
+                    h += '<div class="item" role="button" tabindex="-1" id="row-prev" style="text-align:center; color: var(--gold); font-weight:bold; padding: 15px;" onclick="App.prevPage()">^ PÁGINA ANTERIOR</div>';
+                }
+
+                for(var i = start; i < end; i++) {
                     var n = d[i].name || d[i].title; var id = d[i].stream_id || d[i].series_id;
                     var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
-                    // ADICIONADO role="button" e tabindex="-1" na geração da lista HTML
                     h += '<div class="item" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+')">'+n+icn+'</div>';
                 }
-                if(max > this.renderLimit) { h += '<div class="item" role="button" tabindex="-1" id="row-'+limit+'" style="text-align:center; color: var(--gold); font-weight:bold; padding: 25px;" onclick="App.loadMore()">+ CARREGAR MAIS ('+(max - this.renderLimit)+' restantes)</div>'; }
-                document.getElementById('item-list').innerHTML = h; this.zone = 2; if(!keepIdx) { this.idx = 0; } this.updateFocus();
+                
+                if(end < max) { 
+                    h += '<div class="item" role="button" tabindex="-1" id="row-next" style="text-align:center; color: var(--gold); font-weight:bold; padding: 15px;" onclick="App.nextPage()">v PRÓXIMA PÁGINA</div>'; 
+                }
+                
+                document.getElementById('item-list').innerHTML = h; this.zone = 2; 
+                if(!keepIdx) { this.idx = this.page > 0 ? 'prev' : start; } 
+                this.updateFocus();
             },
 
-            loadMore: function() { this.renderLimit += 50; this.renderList(true); this.idx = this.renderLimit - 50; this.updateFocus(); },
+            nextPage: function() { this.page++; this.renderList(true); this.idx = 'prev'; this.updateFocus(); },
+            prevPage: function() { this.page--; this.renderList(true); this.idx = 'next'; this.updateFocus(); },
+            
             itemClick: function(i) { this.idx=i; this.zone=2; this.clickItem(); requestNativeFullscreen(); },
             
             clickItem: function() {
-                if(this.idx >= this.renderLimit && this.idx === Math.min(this.fullData.length, this.renderLimit)) { this.loadMore(); return; }
                 if(this.isFolder) { this.playStream(this.seriesEps[this.idx]); return; }
                 var item = this.fullData[this.idx]; if(this.mode !== 'series') { if(item) this.playStream(item); return; }
                 
                 if(item) {
-                    this.storedList = [...this.fullData]; this.memIdx = this.idx; 
+                    this.storedList = [...this.fullData]; this.memIdx = this.idx; this.page = 0;
                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_series_info&series_id="+item.series_id, function(d){
                         if(d && d.episodes) {
                             var eps = []; for(var k in d.episodes) for(var j=0; j<d.episodes[k].length; j++) eps.push(d.episodes[k][j]);
-                            App.seriesEps = eps; App.fullData = eps; App.isFolder = true; App.renderLimit=150; App.renderList();
+                            App.seriesEps = eps; App.fullData = eps; App.isFolder = true; App.renderList();
                             document.getElementById('meta-title').innerText = "📂 " + (item.name || item.title);
                         }
                     });
@@ -595,7 +617,11 @@
                 if(!this.playingId) return;
                 for(var i=0; i<this.fullData.length; i++) {
                     var id = this.fullData[i].stream_id || this.fullData[i].series_id || this.fullData[i].id;
-                    if(id == this.playingId) { if(i >= this.renderLimit) { this.renderLimit = i + 50; this.renderList(true); } this.idx = i; this.updateFocus(); return; }
+                    if(id == this.playingId) { 
+                        var targetPage = Math.floor(i / this.itemsPerPage);
+                        if(this.page !== targetPage) { this.page = targetPage; this.renderList(true); }
+                        this.idx = i; this.updateFocus(); return; 
+                    }
                 }
             },
 
@@ -618,7 +644,7 @@
                                 res.push(d[i]);
                             }
                         }
-                        App.fullData = res; App.isFolder = false; App.renderLimit = 50; App.renderList(); App.zone = 2; App.idx = 0; App.updateFocus(); 
+                        App.fullData = res; App.isFolder = false; App.page = 0; App.renderList(); App.zone = 2; App.idx = 0; App.updateFocus(); 
                     } else {
                         document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: red;">Erro ao buscar dados.</div>';
                     }
@@ -687,7 +713,7 @@
             back: function() {
                 if(document.getElementById('vid-box').classList.contains('fs')) { this.exitFull(); return; }
                 if(this.zone===3) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); return; }
-                if(this.zone===2 && this.isFolder) { this.isFolder = false; this.fullData = this.storedList; this.renderLimit = 50; this.renderList(true); this.idx = this.memIdx; this.updateFocus(); document.getElementById('meta-title').innerHTML = 'R&C GOLD PRO'; return; }
+                if(this.zone===2 && this.isFolder) { this.isFolder = false; this.fullData = this.storedList; this.page = 0; this.renderList(true); this.idx = this.memIdx; this.updateFocus(); document.getElementById('meta-title').innerHTML = 'R&C GOLD PRO'; return; }
                 if(this.zone===2) { this.zone=0; this.idx=this.lastCatIdx; this.updateFocus(); return; }
                 if(this.zone===1) { this.zone=2; this.idx=0; this.updateFocus(); return; }
                 if(this.zone===0) { this.setScr(1); return; }
@@ -743,7 +769,28 @@
                 if(this.scr===2) {
                     if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
                     if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; } }
-                    else if(this.zone===2) { var max = document.getElementById('item-list').children.length-1; if(d===1 && this.idx<max) this.idx++; else if(d===0) { if(this.idx > 0) this.idx--; else this.zone = 1; } else if(d===2) { this.zone=0; this.idx=this.lastCatIdx; } else if(d===3) this.zone=3; }
+                    else if(this.zone===2) { 
+                        var dataLen = App.fullData.length;
+                        var startIdx = App.page * App.itemsPerPage;
+                        var endIdx = Math.min(startIdx + App.itemsPerPage, dataLen);
+                        
+                        if(d===1) { // Para Baixo
+                            if(this.idx === 'prev') { this.idx = startIdx; }
+                            else if(typeof this.idx === 'number' && this.idx < endIdx - 1) { this.idx++; }
+                            else if(typeof this.idx === 'number' && this.idx === endIdx - 1 && endIdx < dataLen) { this.idx = 'next'; }
+                        } else if(d===0) { // Para Cima
+                            if(this.idx === 'next') { this.idx = endIdx - 1; }
+                            else if(typeof this.idx === 'number' && this.idx > startIdx) { this.idx--; }
+                            else if(typeof this.idx === 'number' && this.idx === startIdx) {
+                                if(App.page > 0) this.idx = 'prev';
+                                else this.zone = 1; 
+                            }
+                        } else if(d===2) { // Para Esquerda
+                            this.zone=0; this.idx=this.lastCatIdx; 
+                        } else if(d===3) { // Para Direita
+                            this.zone=3; 
+                        }
+                    }
                     else if(this.zone===1) { if(d===1) { this.zone=2; this.idx=0; } if(d===2) { this.zone=0; this.idx=this.lastCatIdx; } }
                 }
                 this.updateFocus();
@@ -761,7 +808,11 @@
                 }
                 if(this.scr===2) {
                     if(this.zone===0) this.loadContent(this.idx); if(this.zone===1) this.doSearch();
-                    if(this.zone===2) { var el = document.getElementById('row-'+this.idx); if(el && el.innerText.indexOf('CARREGAR MAIS') > -1) { this.loadMore(); } else { this.clickItem(); } }
+                    if(this.zone===2) { 
+                        if(this.idx === 'prev') App.prevPage();
+                        else if(this.idx === 'next') App.nextPage();
+                        else App.clickItem(); 
+                    }
                     if(this.zone===3) this.toggleFull(); 
                 }
             }
