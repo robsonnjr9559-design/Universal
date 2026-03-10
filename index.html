@@ -26,31 +26,50 @@
             -webkit-tap-highlight-color: transparent; -webkit-user-select: none; user-select: none;           
         }
         
+        /* ACELERAÇÃO DE HARDWARE MÁXIMA PARA A PHILCO */
         html, body {
-            background: #000000; color: #ffffff; font-family: 'Montserrat', sans-serif;
+            background: #000000; 
+            color: #ffffff; font-family: 'Montserrat', sans-serif;
             position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
-            overflow: hidden !important; transform: translate3d(0,0,0); backface-visibility: hidden;
+            overflow: hidden !important;
+            transform: translate3d(0,0,0);
+            backface-visibility: hidden;
         }
 
         .hide { display: none !important; }
         .flex-center { display: flex; align-items: center; justify-content: center; }
-        .layer { position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: #000; }
+        .layer { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 10; background: transparent; will-change: opacity; }
 
-        button, .smart-card, .cat-item, .item, .power-btn, .key, .toggle-btn { cursor: pointer; transition: transform 0.1s linear; }
-        .cat-list, .item-list, .meta { overflow-y: auto; -webkit-overflow-scrolling: touch; }
+        button, .smart-card, .cat-item, .item, .power-btn, .key, .toggle-btn { 
+            cursor: pointer; 
+            transition: transform 0.1s linear; 
+        }
+        
+        .cat-list, .item-list, .meta { 
+            overflow-y: auto; 
+            -webkit-overflow-scrolling: touch; 
+        }
 
-        /* OTIMIZAÇÃO FOCO TV */
+        /* OTIMIZAÇÃO FOCO */
         .focused { 
-            border: 2px solid #fff !important; background: #FFD700 !important; color: #000 !important; 
-            z-index: 50; transform: scale(1.02); box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+            border: 2px solid #fff !important; 
+            background: #FFD700 !important; 
+            color: #000 !important; 
+            z-index: 50; 
+            transform: scale(1.02); 
+            box-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
         }
         .focused i, .focused span, .focused div { color: #000 !important; }
         
         #vid-box.focused { border: 4px solid var(--gold-main) !important; transform: none; box-shadow: none; background: transparent !important; }
-        #vid-box.fs { border: none !important; width: 100% !important; height: 100% !important; z-index: 9999 !important; position: fixed !important; top: 0 !important; left: 0 !important; background: #000 !important; }
+        #vid-box.fs, #vid-box.fs.focused { border: none !important; width: 100% !important; height: 100% !important; z-index: 9999 !important; position: fixed !important; top: 0 !important; left: 0 !important; background: #000 !important; }
 
-        /* Estilos UI */
-        .login-box { width: 450px; max-width: 90%; padding: 40px; background: #0a0a0a; border: 2px solid #FFD700; border-radius: 12px; text-align: center; }
+        /* Estilos Padrão */
+        .login-box { 
+            width: 450px; max-width: 90%; padding: 40px; 
+            background: #0a0a0a; border: 2px solid #FFD700; border-radius: 12px; 
+            text-align: center; 
+        }
         .logo-txt { font-size: 4.5vh; font-weight: 900; margin-bottom: 2.5vh; }
         .gold-text { color: var(--gold-main); }
         .inp { width: 100%; padding: 16px; margin: 10px 0; background: #1a1a1a; border: 1px solid #333; color: #fff; text-align: center; font-weight: 600; border-radius: 8px; font-size: 16px; }
@@ -60,7 +79,7 @@
         .toggle-btn { flex: 1; padding: 1.5vh; background: #1a1a1a; border: 1px solid #333; color: #888; font-size: var(--font-sm); font-weight: 800; border-radius: 1vh; }
         .info-row { display: flex; justify-content: space-between; padding: 1vh 0; border-bottom: 1px solid #222; font-size: var(--font-sm); color: #ccc; }
         
-        #dash-layer { display: flex; flex-direction: column; padding: 4vh 4vw; }
+        #dash-layer { display: flex; flex-direction: column; padding: 4vh 4vw; height: 100%; }
         .top-bar { display: flex; justify-content: space-between; align-items: center; height: 14vh; margin-bottom: 2vh; }
         .dash-logo { font-size: var(--font-lg); font-weight: 900; }
         .dash-clock { text-align: right; }
@@ -70,7 +89,12 @@
         .power-btn { width: 7vh; height: 7vh; font-size: 3.5vh; background: transparent; border: none; color: #666; display: flex; align-items: center; justify-content: center; }
 
         .dash-grid { display: flex; gap: 4vw; justify-content: center; align-items: center; flex: 1; width: 100%; }
-        .smart-card { width: 24vw; height: 50vh; background: #101010; border: 1px solid #333; border-radius: 2.5vh; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .smart-card { 
+            width: 24vw; height: 50vh; 
+            background: #101010; 
+            border: 1px solid #333; border-radius: 2.5vh; 
+            display: flex; flex-direction: column; align-items: center; justify-content: center; 
+        }
         .smart-card i { font-size: 15vh; margin-bottom: 4vh; color: #444; }
         .smart-card span { font-size: 3.5vh; font-weight: 900; color: #fff; text-transform: uppercase; }
         .bottom-bar { display: flex; justify-content: space-between; margin-top: auto; padding-bottom: 1vh; }
@@ -78,7 +102,7 @@
         .lbl { font-size: var(--font-xs); color: #999; display: block; font-weight: 700; }
         .val { font-size: var(--font-md); color: var(--gold-main); font-weight: 900; }
 
-        #content-layer { display: flex; flex-direction: row; width: 100%; height: 100%; background: #000; }
+        #content-layer { display: flex; width: 100%; height: 100%; background: #000; }
         .col-cat { width: 25%; background: #08080a; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; }
         .col-list { width: 35%; background: #101014; display: flex; flex-direction: column; border-right: 2px solid #1a1a1a; }
         .col-play { flex: 1; display: flex; flex-direction: column; position: relative; }
@@ -97,45 +121,58 @@
         .item.playing { color: var(--gold-main); background: #111; border-left: 4px solid var(--gold-main); }
         .fav-icon { float: right; color: var(--gold-main); }
 
+        /* PLAYER LIMPO E ESCURO - SEM LOGO, SEM TEXTO, SEM TRAVAMENTO */
         .vid-box { width: 100%; height: 50vh; background: #000; position: relative; border-bottom: 2px solid #222; overflow: hidden; }
-        video { width: 100%; height: 100%; object-fit: contain; background: #000; z-index: 1; }
+        
+        video { 
+            width: 100%; height: 100%; 
+            object-fit: contain; 
+            background: #000;
+            z-index: 1;
+        }
 
         .meta { padding: 25px; flex: 1; background: #0a0a0c; display: flex; flex-direction: column; }
         .meta-title { font-size: var(--font-lg); color: var(--gold-main); font-weight: 900; margin-bottom: 1vh; }
         .meta-desc { font-size: var(--font-sm); color: #999; margin-bottom: 1vh; }
         
-        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; margin-top: auto; flex-wrap: wrap;}
-        .key { flex: 1; min-width: 80px; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; margin-bottom: 5px;}
+        .keys { display: flex; justify-content: space-between; align-items: center; gap: 1vw; padding-top: 2vh; border-top: 2px solid #1a1a1a; margin-top: auto; }
+        .key { flex: 1; font-size: var(--font-xs); color: #fff; font-weight: 700; background: #1a1a1a; border: 1px solid #333; padding: 1.2vh 0.5vw; border-radius: 0.8vh; display: flex; align-items: center; justify-content: center; white-space: nowrap; }
         .dot { width: 1.2vh; height: 1.2vh; border-radius: 50%; flex-shrink: 0; margin-right: 1.2vw; }
 
         #loader { background: #000; z-index: 20000; flex-direction: column; color: var(--gold-main); font-weight: 900; font-size: var(--font-lg); }
+        
+        /* OSD OCULTO - NÃO MOSTRA MENSAGENS NO VÍDEO */
+        .osd-status { display: none !important; } 
+
+        /* CAMADA DE PAUSE */
         #pause-layer { display: none; position: absolute; top:0; left:0; width:100%; height:100%; background: rgba(0,0,0,0.4); z-index: 9000; align-items: center; justify-content: center; pointer-events: none; }
         
         ::-webkit-scrollbar { width: 4px; }
         ::-webkit-scrollbar-thumb { background: #333; }
-
-        /* INJEÇÃO UNIVERSAL 2: Layout Responsivo Mobile (Substitui o Rotate Layer) */
-        @media screen and (max-width: 900px), screen and (orientation: portrait) {
-            :root { --font-xs: 12px; --font-sm: 14px; --font-md: 18px; --font-lg: 24px; }
-            #content-layer { flex-direction: column; }
-            /* No celular, o player fica no topo e as listas embaixo */
-            .col-play { order: 1; height: 35vh; flex: none; border-bottom: 2px solid #FFD700; }
-            .vid-box { height: 100%; border-bottom: none; }
-            .meta { display: none; /* Esconde metadados no mobile para dar espaço */ }
-            .col-cat { order: 2; width: 100%; height: 25vh; border-right: none; border-bottom: 2px solid #1a1a1a; }
-            .col-list { order: 3; width: 100%; flex: 1; border-right: none; }
-            .dash-grid { flex-direction: column; gap: 2vh; }
-            .smart-card { width: 90vw; height: 15vh; flex-direction: row; justify-content: space-evenly; }
-            .smart-card i { font-size: 6vh; margin-bottom: 0; }
-            .top-bar { flex-direction: column; height: auto; text-align: center; gap: 1vh; }
-            .dash-clock { text-align: center; }
-            .bottom-bar { display: none; /* Esconde rodapé no mobile */ }
+        
+        /* ROTATE */
+        #rotate-layer { display: none; background: #000; z-index: 99999; flex-direction: column; text-align: center; }
+        .rotate-icon { font-size: 10vh; color: var(--gold-main); margin-bottom: 3vh; animation: rotate-phone 2s infinite ease-in-out; }
+        .rotate-msg { font-size: 3vh; font-weight: 900; color: #fff; }
+        @keyframes rotate-phone { 
+            0%, 100% { transform: rotate(0deg); opacity: 0; } 
+            25%, 50% { transform: rotate(-90deg); opacity: 1; } 
+            75% { transform: rotate(-90deg); opacity: 0; } 
+        }
+        @media screen and (orientation: portrait) {
+            #rotate-layer { display: flex !important; }
+            #login-layer, #dash-layer, #content-layer, #settings-layer, #loader { display: none !important; }
         }
     </style>
 </head>
 <body onload="App.init()">
 
-    <div id="loader" class="layer flex-center hide">
+    <div id="rotate-layer" class="layer flex-center">
+        <i class="fas fa-mobile-alt rotate-icon"></i>
+        <div class="rotate-msg">POR FAVOR<br><span style="color: #FFD700">GIRE A TELA</span></div>
+    </div>
+
+    <div id="loader" class="hide flex-center">
         <i class="fas fa-circle-notch fa-spin" style="margin-bottom:20px; font-size: 8vh;"></i>
         <div id="load-txt">CARREGANDO...</div>
     </div>
@@ -157,6 +194,8 @@
             <div class="info-row"><span id="lbl-set-u">USUÁRIO:</span> <span id="set-user">...</span></div>
             <div class="info-row"><span id="lbl-set-e">VENCIMENTO:</span> <span id="set-exp">...</span></div>
             <div class="info-row"><span id="lbl-set-c">TELAS:</span> <span id="set-conn">...</span></div>
+            <div class="info-row"><span id="lbl-set-d">CRIADO:</span> <span id="set-created">...</span></div>
+            
             <div class="config-row" style="margin-top: 30px;"><div id="s0" class="toggle-btn focusable" style="border-color: #333; background: #111; cursor: default;">OPÇÕES</div></div>
             <div class="config-row">
                 <div id="s1" class="toggle-btn focusable" onclick="App.toggleLang()"><span id="lbl-set-lang">IDIOMA:</span> <span id="lbl-lang" style="color:#fff">🇧🇷 PT</span></div>
@@ -165,6 +204,7 @@
                 <div id="s2" class="toggle-btn focusable" onclick="App.toggleCfg('filter')"><span id="lbl-set-filter">XXX:</span> <span id="lbl-filter" style="color:#fff">NÃO</span></div>
                 <div id="s3" class="toggle-btn focusable" onclick="App.toggleFormat()"><span id="lbl-set-format">FMT:</span> <span id="lbl-format" style="color:#fff">TS NAT</span></div>
             </div>
+            
             <button id="s4" class="btn focusable" onclick="App.closeSettings()" style="background: #333; color: #fff; margin-top: 20px;">VOLTAR</button>
         </div>
     </div>
@@ -220,15 +260,20 @@
             <div class="meta">
                 <div id="meta-title" class="meta-title"><span style="color:#fff">HDTV</span>&nbsp;GOLD PRO</div>
                 <div id="meta-desc" class="meta-desc"></div>
+                
                 <div class="keys">
-                    <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000"></div> TELA CHEIA</div>
-                    <div class="key" id="key-menu"><div class="dot" style="background-color:#33b5e5"></div> VOLTAR</div>
+                    <div class="key" id="key-fs"><div class="dot" style="background-color:#FF0000"></div> TELA CHEIA (R)</div>
+                    <div class="key" id="key-top"><div class="dot" style="background-color:#00C851"></div> TOPO (G)</div>
+                    <div class="key" id="key-search"><div class="dot" style="background-color:#ffbb33"></div> BUSCAR (Y)</div>
+                    <div class="key" id="key-menu"><div class="dot" style="background-color:#33b5e5"></div> MENU (B)</div>
                 </div>
             </div>
         </div>
     </div>
 
     <script>
+        /* === ROBÔ TÉCNICO V6 + UNIVERSAL HLS.JS === */
+        
         function safePlay(vidElement) {
             if (!vidElement) return;
             try { 
@@ -244,7 +289,7 @@
         function requestNativeFullscreen(elem) {
             var target = elem || document.documentElement;
             try {
-                if (target.requestFullscreen) { target.requestFullscreen().catch(function(){}); } 
+                if (target.requestFullscreen) { var p = target.requestFullscreen(); if(p !== undefined && typeof p.catch === 'function') { p.catch(function(){}); } } 
                 else if (target.webkitRequestFullscreen) { target.webkitRequestFullscreen(); }
             } catch (e) {}
         }
@@ -261,15 +306,16 @@
             isFav: function(id) { return this.list.indexOf(id) > -1; }
         };
 
-        // INJEÇÃO UNIVERSAL 3: Refatoração do PlayerEngine para suportar HLS nativamente em PCs/Mobiles
         var PlayerEngine = {
-            video: null, hlsObj: null, url: null, monitorTimer: null, lastTime: 0, stallCount: 0, retryCount: 0, maxRetries: 5, liveMaxRetries: 999999, 
+            video: null, hlsObj: null, url: null, monitorTimer: null, lastTime: 0, stallCount: 0, 
+            retryCount: 0, maxRetries: 5, liveMaxRetries: 999999, 
 
             init: function() { this.bindVideo(); },
 
             bindVideo: function() {
                 this.video = document.getElementById('player');
                 if(!this.video) return;
+                
                 this.video.onended = function() { 
                     if (App.currentMode === 'series' && App.fullData && App.fullData[App.idx] && App.fullData[App.idx].is_episode) {
                         var nextIdx = App.idx + 1;
@@ -278,8 +324,10 @@
                             setTimeout(function() { App.itemClick(nextIdx); }, 800); return; 
                         }
                     }
-                    if(App.currentMode !== 'live') PlayerEngine.hardReset(); else PlayerEngine.handleError(); 
+                    if(App.currentMode !== 'live') PlayerEngine.hardReset();
+                    else PlayerEngine.handleError(); 
                 };
+                
                 this.video.onerror = function() { PlayerEngine.handleError(); };
                 this.video.controls = false;
                 this.video.setAttribute('playsinline', 'true');
@@ -291,9 +339,13 @@
                 if(container) {
                     container.innerHTML = '';
                     var newVid = document.createElement('video');
-                    newVid.id = 'player'; newVid.style.width = '100%'; newVid.style.height = '100%';
-                    newVid.style.objectFit = 'contain'; newVid.style.background = '#000';
-                    newVid.playsInline = true; newVid.webkitPlaysInline = true;
+                    newVid.id = 'player';
+                    newVid.style.width = '100%';
+                    newVid.style.height = '100%';
+                    newVid.style.objectFit = 'contain';
+                    newVid.style.background = '#000';
+                    newVid.playsInline = true;
+                    newVid.webkitPlaysInline = true;
                     newVid.poster = "data:image/gif;base64,R0lGODlhAQABAIAAAAAAAP///yH5BAEAAAAALAAAAAABAAEAAAIBRAA7";
                     container.appendChild(newVid);
                     this.bindVideo();
@@ -302,6 +354,7 @@
 
             play: function(url) {
                 if(this.url === url && this.video && !this.video.paused) return;
+                
                 var isRetry = (this.url === url);
                 this.hardStop(isRetry); 
                 
@@ -311,7 +364,6 @@
 
                 if(!this.video) return;
 
-                // Lógica Universal HLS.js (Para PC e Android) vs Nativo (Para TV Tizen/WebOS e Safari/iOS)
                 var ext = url.split('.').pop().split('?')[0].toLowerCase();
                 
                 if (typeof Hls !== 'undefined' && Hls.isSupported() && (ext === 'm3u8' || ext === 'ts')) {
@@ -321,63 +373,159 @@
                     this.hlsObj.on(Hls.Events.MANIFEST_PARSED, function() { safePlay(PlayerEngine.video); });
                     this.hlsObj.on(Hls.Events.ERROR, function(event, data) { if(data.fatal) { PlayerEngine.handleError(); } });
                 } else {
-                    // Fallback para Smart TVs e iOS nativo
                     this.video.src = url; 
                     safePlay(this.video);
                 }
             },
             
-            startMonitor: function() { /* Mantido */ },
+            startMonitor: function() {
+                this.stopMonitor();
+                this.monitorTimer = setInterval(function() {
+                    var v = PlayerEngine.video; if(!v || !PlayerEngine.url || v.paused) return;
+                    
+                    if(Math.abs(v.currentTime - PlayerEngine.lastTime) < 0.1) {
+                        PlayerEngine.stallCount++;
+                        if(PlayerEngine.stallCount > 15) { 
+                            PlayerEngine.stallCount = 0; 
+                            PlayerEngine.handleError(); 
+                        }
+                    } else { PlayerEngine.stallCount = 0; PlayerEngine.lastTime = v.currentTime; }
+                }, 1000);
+            },
             stopMonitor: function() { if(this.monitorTimer) clearInterval(this.monitorTimer); },
             
             handleError: function() {
                 var isLive = (App.currentMode === 'live');
                 var limit = isLive ? this.liveMaxRetries : this.maxRetries;
+
                 if (this.retryCount < limit) {
                     this.retryCount++;
                     if(this.retryCount > 3) this.resetDOM();
-                    var delay = (this.retryCount > 5) ? 3000 : 1000;
+                    
+                    var delay = 1000;
+                    if(this.retryCount > 5) delay = 3000;
+                    
                     setTimeout(function() { PlayerEngine.play(PlayerEngine.url); }, delay);
-                } else { this.hardStop(); }
+                } else {
+                    this.hardStop();
+                }
             },
 
-            hardReset: function() { if(!this.url) return; var currentUrl = this.url; this.hardStop(); this.retryCount = 0; setTimeout(function() { PlayerEngine.play(currentUrl); }, 500); },
+            hardReset: function() { 
+                if(!this.url) return; 
+                var currentUrl = this.url; 
+                this.hardStop(); 
+                this.retryCount = 0; 
+                setTimeout(function() { PlayerEngine.play(currentUrl); }, 500); 
+            },
             
             hardStop: function(isRetry) { 
                 this.stopMonitor(); 
                 if(this.hlsObj) { this.hlsObj.destroy(); this.hlsObj = null; }
                 if(this.video && !isRetry) { 
-                    this.video.onerror = null; this.video.pause(); this.video.removeAttribute('src'); this.video.src = ''; 
+                    this.video.onerror = null; 
+                    this.video.pause(); 
+                    this.video.removeAttribute('src'); 
+                    this.video.src = ''; 
                     try { this.video.load(); } catch(e){} 
                 } 
                 if(!isRetry) this.url = null;
             }
         };
 
-        // Mantive todo o seu core lógico intacto (i18n, navegação, requisições XTREAM)
         var App = {
             validCategories: null, scr: 0, zone: 0, idx: 0, lastCatIdx: 0, creds: {}, fullData: [], globalData: null, playingId: null,
-            cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0,
-            
+            cfg: { filter: false, format: 'ts_native', lang: 'pt' }, userInfo: null, lastEnter: 0, touchTimer: null,
+            seriesDataCache: null, lastSeriesIdx: 0, sessionStartTime: null, refreshInterval: 6 * 60 * 60 * 1000, refreshTimer: null,
+
             pad: function(n) { return (n < 10) ? ("0" + n) : n; },
-            smartSort: function(a, b) { var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase(); try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } catch (e) { return nameA < nameB ? -1 : 1; } },
+            
+            smartSort: function(a, b) {
+                var nameA = (a.name || a.title || "").toLowerCase(); var nameB = (b.name || b.title || "").toLowerCase();
+                try { return nameA.localeCompare(nameB, undefined, { numeric: true, sensitivity: 'base' }); } 
+                catch (e) { return nameA < nameB ? -1 : 1; }
+            },
 
             i18n: {
-                'pt': { ph_dns: 'URL DNS', ph_user: 'USUÁRIO', ph_pass: 'SENHA', btn_login: 'CONECTAR', load_init: 'INICIANDO...', load_auth: 'AUTENTICANDO...', load_net: 'REDE...', err_net: 'Falha Conexão', err_auth: 'Login Inválido', set_title: 'MI CONTA', dash_live: 'TV AO VIVO', dash_movie: 'FILMES', dash_series: 'SÉRIES', cat_fav: '⭐ FAVORITOS', empty: 'Vazio', loading: 'CARREGANDO...', loading_ep: 'EPISÓDIOS...', no_ep: 'Sem episódios.', tot_pre: 'TOTAL: ' },
-                // Adicionei simplificado aqui para economizar espaço, seu código original tinha os 3 idiomas completos, o que continua funcionando se você mesclar.
+                'en': { ph_dns: 'DNS URL', ph_user: 'USERNAME', ph_pass: 'PASSWORD', btn_login: 'CONNECT', load_init: 'STARTING...', load_auth: 'LOGGING IN...', load_net: 'NETWORK...', err_net: 'Connection Failed', err_auth: 'Invalid Login', set_title: 'MY ACCOUNT', set_u: 'USER:', set_e: 'EXP:', set_c: 'CONN:', set_d: 'DATE:', set_opt: 'OPTIONS', set_filter: 'BLOCK:', set_format: 'FMT:', set_lang: 'LANG:', set_back: 'BACK', yes: 'YES', no: 'NO', fmt_def: 'DEF', dash_live: 'LIVE TV', dash_movie: 'MOVIES', dash_series: 'SERIES', lbl_exp: 'EXPIRATION', lbl_conn: 'SCREENS', cat_title: 'MENU', cat_fav: '⭐ FAV', search_ph: 'SEARCH...', empty: 'Empty', loading: 'LOADING...', loading_ep: 'EPISODES...', no_ep: 'No episodes.', osd_play: '▶ PLAY', osd_pause: '⏸ PAUSE', osd_lost: 'NO SIGNAL', key_fs: 'FULLSCREEN (R)', key_top: 'TOP (G)', key_search: 'FIND (Y)', key_menu: 'MENU (B)', tot_chan: 'CH', tot_mov: 'MOV', tot_ser: 'SER', tot_pre: 'TOTAL: ', def_movie: 'Movie', def_ep: 'Episode', unlimited: 'Unlimited', unknown: 'Unknown', flag: '🇺🇸 EN' },
+                'pt': { ph_dns: 'URL DNS', ph_user: 'USUÁRIO', ph_pass: 'SENHA', btn_login: 'CONECTAR', load_init: 'INICIANDO...', load_auth: 'AUTENTICANDO...', load_net: 'REDE...', err_net: 'Falha Conexão', err_auth: 'Login Inválido', set_title: 'MINHA CONTA', set_u: 'USUÁRIO:', set_e: 'VENCE:', set_c: 'TELAS:', set_d: 'CRIADO:', set_opt: 'OPÇÕES', set_filter: 'XXX:', set_format: 'FMT:', set_lang: 'IDIOMA:', set_back: 'VOLTAR', yes: 'SIM', no: 'NÃO', fmt_def: 'PADRÃO', dash_live: 'TV AO VIVO', dash_movie: 'FILMES', dash_series: 'SÉRIES', lbl_exp: 'VENCIMENTO', lbl_conn: 'TELAS', cat_title: 'MENU', cat_fav: '⭐ FAVORITOS', search_ph: 'BUSCAR...', empty: 'Vazio', loading: 'CARREGANDO...', loading_ep: 'EPISÓDIOS...', no_ep: 'Sem episódios.', osd_play: '▶ TOCA', osd_pause: '⏸ PAUSA', osd_lost: 'SEM SINAL', key_fs: 'TELA CHEIA (R)', key_top: 'TOPO (G)', key_search: 'BUSCA (Y)', key_menu: 'MENU (B)', tot_chan: 'CANAIS', tot_mov: 'FILMES', tot_ser: 'SÉRIES', tot_pre: 'TOTAL: ', def_movie: 'Filme', def_ep: 'Episódio', unlimited: 'Ilimitado', unknown: 'Desconhecido', flag: '🇧🇷 PT' },
+                'es': { ph_dns: 'URL DNS', ph_user: 'USUARIO', ph_pass: 'CLAVE', btn_login: 'CONECTAR', load_init: 'INICIANDO...', load_auth: 'AUTENTICANDO...', load_net: 'RED...', err_net: 'Fallo Conexión', err_auth: 'Login Inválido', set_title: 'MI CUENTA', set_u: 'USUARIO:', set_e: 'VENCE:', set_c: 'PANTALLAS:', set_d: 'CREADO:', set_opt: 'OPCIONES', set_filter: 'XXX:', set_format: 'FMT:', set_lang: 'IDIOMA:', set_back: 'VOLVER', yes: 'SÍ', no: 'NO', fmt_def: 'DEFECTO', dash_live: 'TV VIVO', dash_movie: 'PELÍCULAS', dash_series: 'SERIES', lbl_exp: 'VENCIMIENTO', lbl_conn: 'PANTALLAS', cat_title: 'MENÚ', cat_fav: '⭐ FAVORITOS', search_ph: 'BUSCAR...', empty: 'Vacío', loading: 'CARGANDO...', loading_ep: 'EPISODIOS...', no_ep: 'No hay episodios.', osd_play: '▶ PLAY', osd_pause: '⏸ PAUSA', osd_lost: 'SIN SEÑAL', key_fs: 'PANTALLA COMPLETA (R)', key_top: 'TOP (G)', key_search: 'BUSCA (Y)', key_menu: 'MENÚ (B)', tot_chan: 'CANALES', tot_mov: 'PELIS', tot_ser: 'SERIES', tot_pre: 'TOTAL: ', def_movie: 'Película', def_ep: 'Episodio', unlimited: 'Ilimitado', unknown: 'Desconocido', flag: '🇪🇸 ES' }
+            },
+
+            applyLang: function() {
+                var t = this.i18n[this.cfg.lang];
+                document.getElementById('i0').placeholder = t.ph_dns; document.getElementById('i1').placeholder = t.ph_user; document.getElementById('i2').placeholder = t.ph_pass; document.getElementById('i3').innerText = t.btn_login;
+                document.getElementById('set-title-txt').innerHTML = '<i class="fas fa-user-shield" style="margin-right:10px; color: #FFD700;"></i>' + t.set_title;
+                document.getElementById('lbl-set-u').innerText = t.set_u; document.getElementById('lbl-set-e').innerText = t.set_e; document.getElementById('lbl-set-c').innerText = t.set_c; document.getElementById('lbl-set-d').innerText = t.set_d;
+                document.getElementById('s0').innerText = t.set_opt; document.getElementById('lbl-set-filter').innerText = t.set_filter; document.getElementById('lbl-set-format').innerText = t.set_format; document.getElementById('lbl-set-lang').innerText = t.set_lang; document.getElementById('s4').innerText = t.set_back;
+                document.getElementById('dash-m0').innerText = t.dash_live; document.getElementById('dash-m1').innerText = t.dash_movie; document.getElementById('dash-m2').innerText = t.dash_series;
+                document.getElementById('lbl-exp-txt').innerText = t.lbl_exp; document.getElementById('lbl-conn-txt').innerText = t.lbl_conn;
+                document.getElementById('cat-title-txt').innerText = t.cat_title; document.getElementById('search').placeholder = t.search_ph;
+                document.getElementById('key-fs').innerHTML = '<div class="dot" style="background-color:#FF0000; box-shadow: 0 0 10px #FF0000;"></div> ' + t.key_fs; 
+                document.getElementById('key-top').innerHTML = '<div class="dot" style="background-color:#00C851; box-shadow: 0 0 10px #00C851;"></div> ' + t.key_top; 
+                document.getElementById('key-search').innerHTML = '<div class="dot" style="background-color:#ffbb33; box-shadow: 0 0 10px #ffbb33;"></div> ' + t.key_search; 
+                document.getElementById('key-menu').innerHTML = '<div class="dot" style="background-color:#33b5e5; box-shadow: 0 0 10px #33b5e5;"></div> ' + t.key_menu;
+                this.updateCfgUI();
+                if (this.scr === 2) { this.countGlobal(); var c0 = document.getElementById('c0'); if(c0) c0.innerText = t.cat_fav; }
+                if(this.userInfo) {
+                    var exp = this.userInfo.exp_date ? new Date(this.userInfo.exp_date*1000).toLocaleDateString('pt-BR') : t.unlimited;
+                    var created = this.userInfo.created_at ? new Date(this.userInfo.created_at*1000).toLocaleDateString('pt-BR') : t.unknown;
+                    document.getElementById('info-exp').innerText = exp; document.getElementById('set-exp').innerText = exp; document.getElementById('set-created').innerText = created;
+                }
             },
 
             init: function() {
                 FavManager.init(); setInterval(function() { window.status = "keep_alive_" + new Date().getTime(); }, 40000);
                 if(localStorage.getItem('rc_cfg_filter')) this.cfg.filter = (localStorage.getItem('rc_cfg_filter') === 'true');
-                if(localStorage.getItem('rc_cfg_format')) this.cfg.format = localStorage.getItem('rc_cfg_format');
-                PlayerEngine.init();
                 
-                if(localStorage.getItem('rc_h')) {
+                var savedFmt = localStorage.getItem('rc_cfg_format');
+                if(savedFmt === 'm3u8_native' || savedFmt === 'ts_native') { this.cfg.format = savedFmt; } 
+                else { this.cfg.format = 'ts_native'; }
+
+                if(localStorage.getItem('rc_cfg_lang')) this.cfg.lang = localStorage.getItem('rc_cfg_lang'); else this.cfg.lang = 'pt'; 
+                this.applyLang(); PlayerEngine.init();
+                setInterval(this.updateClock, 1000); this.updateClock();
+                var needsRefresh = this.checkExistingSession();
+                if(localStorage.getItem('rc_h') && !needsRefresh) {
                     document.getElementById('i0').value = localStorage.getItem('rc_h'); document.getElementById('i1').value = localStorage.getItem('rc_u'); document.getElementById('i2').value = localStorage.getItem('rc_p');
-                    document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = "INICIANDO..."; App.login(true);
+                    document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_init; App.login(true);
                 } else { this.setScr(0); }
             },
+
+            startSessionMonitor: function() {
+                this.sessionStartTime = Date.now(); if (this.refreshTimer) { clearTimeout(this.refreshTimer); }
+                this.refreshTimer = setTimeout(function() { App.performAutoRefresh(); }, this.refreshInterval);
+                localStorage.setItem('rc_session_start', this.sessionStartTime.toString()); localStorage.setItem('rc_refresh_interval', this.refreshInterval.toString());
+            },
+
+            performAutoRefresh: function() { PlayerEngine.hardStop(); localStorage.removeItem('rc_session_start'); localStorage.removeItem('rc_refresh_interval'); setTimeout(function() { location.reload(); }, 500); },
+            checkExistingSession: function() {
+                var savedStart = localStorage.getItem('rc_session_start'); var savedInterval = localStorage.getItem('rc_refresh_interval');
+                if (savedStart && savedInterval) {
+                    var elapsed = Date.now() - parseInt(savedStart); var interval = parseInt(savedInterval);
+                    if (elapsed >= interval) { this.performAutoRefresh(); return true; } 
+                    else { var remaining = interval - elapsed; this.sessionStartTime = parseInt(savedStart); if (this.refreshTimer) { clearTimeout(this.refreshTimer); } this.refreshTimer = setTimeout(function() { App.performAutoRefresh(); }, remaining); }
+                } return false;
+            },
+
+            toggleCfg: function(type) { if(type === 'filter') { this.cfg.filter = !this.cfg.filter; localStorage.setItem('rc_cfg_filter', this.cfg.filter); } this.updateCfgUI(); },
+            
+            toggleFormat: function() {
+                if (this.cfg.format === 'ts_native') { this.cfg.format = 'm3u8_native'; } 
+                else { this.cfg.format = 'ts_native'; }
+                localStorage.setItem('rc_cfg_format', this.cfg.format); 
+                this.updateCfgUI();
+            },
+
+            toggleLang: function() { var langs = ['en', 'pt', 'es']; var current = langs.indexOf(this.cfg.lang); var next = (current + 1) % langs.length; this.cfg.lang = langs[next]; localStorage.setItem('rc_cfg_lang', this.cfg.lang); this.applyLang(); },
+            
+            updateCfgUI: function() { 
+                var t = this.i18n[this.cfg.lang];
+                document.getElementById('lbl-filter').innerText = this.cfg.filter ? t.yes : t.no; document.getElementById('s2').style.borderColor = this.cfg.filter ? '#00C851' : '#333'; document.getElementById('lbl-filter').style.color = this.cfg.filter ? '#00C851' : '#888'; 
+                var fLbl = "TS NAT"; if(this.cfg.format === 'm3u8_native') fLbl = "M3U8 NAT";
+                document.getElementById('lbl-format').innerText = fLbl; document.getElementById('s3').style.borderColor = (this.cfg.format !== 'default') ? '#00C851' : '#333'; document.getElementById('lbl-format').style.color = (this.cfg.format !== 'default') ? '#00C851' : '#888'; document.getElementById('lbl-lang').innerText = t.flag;
+            },
+            updateClock: function() { var now = new Date(); var h = now.getHours(); var m = now.getMinutes(); if(m<10) m='0'+m; var elT = document.getElementById('clock-time'); if(elT) elT.innerText = h + ":" + m; var elD = document.getElementById('clock-date'); if(elD) elD.innerText = now.toLocaleDateString('pt-BR'); },
 
             req: function(url, cb) { 
                 var x = new XMLHttpRequest(); var cacheBuster = (url.indexOf('?') > -1 ? '&' : '?') + '_t=' + new Date().getTime(); 
@@ -388,17 +536,19 @@
             login: function(isAuto) {
                 var h = document.getElementById('i0').value.trim(); var u = document.getElementById('i1').value.trim(); var p = document.getElementById('i2').value.trim();
                 if(h.endsWith('/')) h = h.slice(0, -1); if(h.indexOf('http') === -1) h = 'http://' + h;
-                if(!isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = "AUTENTICANDO..."; } 
+                if(!isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = this.i18n[this.cfg.lang].load_auth; requestNativeFullscreen(document.documentElement); } 
                 this.req(h+"/player_api.php?username="+u+"&password="+p, function(d){
                     document.getElementById('loader').classList.add('hide');
+                    if(d === 'ERR_NET') { if(isAuto) { document.getElementById('loader').classList.remove('hide'); document.getElementById('load-txt').innerText = App.i18n[App.cfg.lang].load_net; setTimeout(function(){ App.login(true); }, 3000); } else { App.setScr(0); document.getElementById('msg-login').innerHTML = App.i18n[App.cfg.lang].err_net; } return; }
                     if(d && d.user_info && d.user_info.auth==1) {
-                        App.creds={h:h,u:u,p:p}; localStorage.setItem('rc_h', h); localStorage.setItem('rc_u', u); localStorage.setItem('rc_p', p); 
-                        App.userInfo = d.user_info; document.getElementById('info-exp').innerText = d.user_info.exp_date ? new Date(d.user_info.exp_date*1000).toLocaleDateString('pt-BR') : "Ilimitado";
-                        App.setScr(1); App.idx=0; App.updateFocus();
-                    } else { App.setScr(0); document.getElementById('msg-login').innerText = "Login Inválido"; localStorage.clear(); }
+                        App.creds={h:h,u:u,p:p}; localStorage.setItem('rc_h', h); localStorage.setItem('rc_u', u); localStorage.setItem('rc_p', p); App.userInfo = d.user_info; var info = d.user_info;
+                        var exp = info.exp_date ? new Date(info.exp_date*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unlimited; var conn = (info.active_cons || 0) + " / " + (info.max_connections || 1);
+                        var created = info.created_at ? new Date(info.created_at*1000).toLocaleDateString('pt-BR') : App.i18n[App.cfg.lang].unknown;
+                        document.getElementById('info-exp').innerText = exp; document.getElementById('info-conn').innerText = conn; document.getElementById('set-user').innerText = info.username || u; document.getElementById('set-exp').innerText = exp; document.getElementById('set-conn').innerText = (info.max_connections || 1); document.getElementById('set-created').innerText = created;
+                        App.startSessionMonitor(); App.setScr(1); App.idx=0; App.updateFocus();
+                    } else { App.setScr(0); document.getElementById('msg-login').innerText = App.i18n[App.cfg.lang].err_auth; localStorage.clear(); }
                 });
             },
-
             logout: function() { PlayerEngine.hardStop(); localStorage.clear(); location.reload(); },
 
             setScr: function(n) {
@@ -406,49 +556,137 @@
                 var layers = document.querySelectorAll('.layer'); for(var i=0; i<layers.length; i++) { layers[i].classList.add('hide'); }
                 if(n===0) document.getElementById('login-layer').classList.remove('hide');
                 if(n===1) document.getElementById('dash-layer').classList.remove('hide');
-                if(n===2) { document.getElementById('content-layer').classList.remove('hide'); document.getElementById('btn-back').classList.remove('hide'); } 
+                if(n===2) { 
+                    document.getElementById('content-layer').classList.remove('hide'); 
+                    document.getElementById('btn-back').classList.remove('hide'); this.page = 0; 
+                } else { var btn = document.getElementById('btn-back'); if(btn) btn.classList.add('hide'); }
                 if(n===3) document.getElementById('settings-layer').classList.remove('hide');
                 this.scr=n; this.zone=0; this.idx=0; this.updateFocus();
             },
 
+            openSettings: function() { this.setScr(3); this.idx = 0; this.updateFocus(); requestNativeFullscreen(); },
+            closeSettings: function() { this.setScr(1); this.idx=3; this.updateFocus(); },
+
+            countGlobal: function() {
+                if (App.globalData && App.validCategories !== null) {
+                    var count = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
+                    for(var i=0; i<App.globalData.length; i++) {
+                        var item = App.globalData[i]; var cid = String(item.category_id);
+                        if (App.cfg.filter) {
+                            if (!App.validCategories[cid]) continue;
+                            var nome = (item.name || item.title || "").toLowerCase(); var show = true;
+                            for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } }
+                            if (show) count++;
+                        } else { count++; }
+                    }
+                    var el = document.getElementById('item-count'); var t = App.i18n[App.cfg.lang];
+                    var typeStr = App.currentMode === 'live' ? t.tot_chan : (App.currentMode === 'movie' ? t.tot_mov : t.tot_ser);
+                    if(el) el.innerText = t.tot_pre + count + " " + typeStr;
+                }
+            },
+
             openMode: function(mode) {
-                this.fullData = []; document.getElementById('cat-list').innerHTML = ''; document.getElementById('item-list').innerHTML = '';
-                mode = mode || 'live'; App.currentMode = mode; PlayerEngine.hardStop(); this.setScr(2);
+                this.fullData = []; this.globalData = null; 
+                document.getElementById('cat-list').innerHTML = '';
+                document.getElementById('item-list').innerHTML = '';
+                
+                mode = mode || 'live'; App.currentMode = mode; PlayerEngine.hardStop(); this.resetInfo(); requestNativeFullscreen();
+                this.playingId = null; this.page = 0; this.validCategories = null; this.setScr(2);
+                var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = '';
+                var countEl = document.getElementById('item-count'); if(countEl) countEl.innerText = t.tot_pre + "...";
                 var actionCat = mode === 'live' ? 'get_live_categories' : (mode === 'movie' ? 'get_vod_categories' : 'get_series_categories');
+                var actionStrm = mode === 'live' ? 'get_live_streams' : (mode === 'movie' ? 'get_vod_streams' : 'get_series');
+
                 this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionCat, function(d){
                     if(d && d!=='ERR_NET') {
-                        var h = '<div class="cat-item" role="button" tabindex="-1" id="c0" data-id="fav" onclick="App.catClick(0)">⭐ FAVORITOS</div>'; 
-                        for(var i=0;i<d.length;i++) { h += '<div class="cat-item" role="button" tabindex="-1" id="c'+(i+1)+'" data-id="'+d[i].category_id+'" onclick="App.catClick('+(i+1)+')">'+d[i].category_name+'</div>'; }
-                        document.getElementById('cat-list').innerHTML = h; App.zone=0; App.idx=0; App.updateFocus();
+                        var h = '<div class="cat-item" role="button" tabindex="-1" id="c0" data-id="fav" onclick="App.catClick(0)">' + t.cat_fav + '</div>'; var count = 0; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
+                        App.validCategories = {};
+                        for(var i=0;i<d.length;i++) {
+                            var nome = d[i].category_name; var show = true;
+                            if(App.cfg.filter) { var lower = nome.toLowerCase(); for(var j=0; j<junk.length; j++) { if(lower.indexOf(junk[j]) > -1) { show = false; break; } } }
+                            if(show) { 
+                                count++; h += '<div class="cat-item" role="button" tabindex="-1" id="c'+count+'" data-id="'+d[i].category_id+'" onclick="App.catClick('+count+')">'+nome+'</div>'; 
+                                App.validCategories[String(d[i].category_id)] = true;
+                            }
+                        }
+                        var listEl = document.getElementById('cat-list'); listEl.innerHTML = ''; listEl.innerHTML = h;
+                        App.zone=0; App.idx=0; App.updateFocus(); App.countGlobal();
                     }
                 });
+                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm, function(d){ if(d && d!=='ERR_NET') { App.globalData = d; App.countGlobal(); } });
             },
             
-            catClick: function(i) { this.idx=i; this.zone=0; this.loadContent(i); },
+            resetInfo: function() { document.getElementById('meta-title').innerHTML = '<span style="color:#fff">HDTV</span>&nbsp;GOLD PRO'; document.getElementById('meta-desc').innerText = ""; var v = document.getElementById('player'); if(v){v.removeAttribute('src'); v.load();} document.getElementById('pause-layer').style.display = 'none'; },
+            catClick: function(i) { this.idx=i; this.zone=0; this.loadContent(i); requestNativeFullscreen(); },
 
             loadContent: function(catIdx) {
-                var el = document.getElementById('c'+catIdx); if(!el) return;
-                var cid = el.getAttribute('data-id'); var catItems = document.querySelectorAll('.cat-item'); 
-                for(var j=0; j<catItems.length; j++) { catItems[j].classList.remove('active'); } el.classList.add('active');
+                document.getElementById('item-list').innerHTML = '';
                 
-                document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">CARREGANDO...</div>';
+                this.page = 0; this.lastCatIdx = catIdx; var el = document.getElementById('c'+catIdx); if(!el) return;
+                var cid = el.getAttribute('data-id'); 
+                var catItems = document.querySelectorAll('.cat-item'); for(var j=0; j<catItems.length; j++) { catItems[j].classList.remove('active'); } el.classList.add('active');
+                
+                var t = App.i18n[App.cfg.lang]; document.getElementById('search').value = ''; document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.loading+'</div>';
                 var actionStrm = App.currentMode === 'live' ? 'get_live_streams' : (App.currentMode === 'movie' ? 'get_vod_streams' : 'get_series');
-                var endPoint = cid === 'fav' ? "" : "&category_id="+cid; // Simplificado para caber aqui
+
+                var onData = function(d) { 
+                    if(d && d!=='ERR_NET') { 
+                        var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
+                        if(App.cfg.filter) {
+                            var res = [];
+                            for(var k=0; k<d.length; k++) {
+                                var nome = (d[k].name || d[k].title || "").toLowerCase(); var show = true;
+                                for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } }
+                                if(show) res.push(d[k]);
+                            }
+                            App.fullData = res;
+                        } else { App.fullData = d; }
+                        App.renderList(); 
+                    } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; }
+                };
+
+                if(cid === 'fav') {
+                     this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm, function(d){ 
+                         if(d && d!=='ERR_NET') { 
+                             var favs = d.filter(function(x){ var fId = x.stream_id || x.series_id || x.id; return FavManager.isFav(fId); }); 
+                             var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
+                             if(App.cfg.filter) {
+                                 var res = [];
+                                 for(var k=0; k<favs.length; k++) {
+                                     var nome = (favs[k].name || favs[k].title || "").toLowerCase(); var show = true;
+                                     for(var j=0; j<junk.length; j++) { if(nome.indexOf(junk[j]) > -1) { show = false; break; } }
+                                     if(show) res.push(favs[k]);
+                                 }
+                                 App.fullData = res;
+                             } else { App.fullData = favs; }
+                             App.renderList(); 
+                         } 
+                     });
+                } else { this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm+"&category_id="+cid, onData); }
+            },
+
+            renderList: function(keepIdx) {
+                var d = this.fullData; var max = d.length; var t = App.i18n[App.cfg.lang];
+                var listEl = document.getElementById('item-list');
+                listEl.innerHTML = '';
+
+                if(max===0) { listEl.innerHTML = '<div style="padding:20px; text-align:center;">'+t.empty+'</div>'; return; }
                 
-                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action="+actionStrm+endPoint, function(d){
-                    if(d && d!=='ERR_NET') { App.fullData = d; App.renderList(); } else { document.getElementById('item-list').innerHTML = 'Vazio'; }
-                });
+                var renderLimit = 1000; 
+                if(max > renderLimit) max = renderLimit; 
+
+                var h = '';
+                for(var i = 0; i < max; i++) {
+                    var n = d[i].name || d[i].title; var id = d[i].stream_id || d[i].series_id || d[i].id;
+                    var icn = FavManager.isFav(id) ? '<i class="fas fa-star fav-icon"></i>' : '';
+                    h += '<div class="item" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+')">'+n+icn+'</div>';
+                }
+                listEl.innerHTML = h; this.zone = 2; if(!keepIdx) { this.idx = 0; } this.updateFocus();
             },
 
-            renderList: function() {
-                var d = this.fullData; var listEl = document.getElementById('item-list'); listEl.innerHTML = '';
-                var max = d.length > 500 ? 500 : d.length; var h = '';
-                for(var i = 0; i < max; i++) { h += '<div class="item" role="button" tabindex="-1" id="row-'+i+'" onclick="App.itemClick('+i+')">'+(d[i].name || d[i].title)+'</div>'; }
-                listEl.innerHTML = h; this.zone = 2; this.idx = 0; this.updateFocus();
-            },
-
-            itemClick: function(i) { 
-                this.idx=i; this.zone=2; this.updateFocus(); // INJEÇÃO 4: Touch foca o item corretamente sem quebrar controle remoto
+            itemClick: function(i) { this.idx=i; this.zone=2; this.updateFocus(); this.clickItem(); requestNativeFullscreen(); },
+            
+            clickItem: function(forcePlay) {
                 var item = this.fullData[this.idx]; 
                 if(item) {
                     if (App.currentMode === 'series' && item.series_id && !item.is_episode) { App.loadEpisodes(item.series_id); } 
@@ -456,82 +694,261 @@
                 }
             },
 
+            loadEpisodes: function(series_id) {
+                App.seriesDataCache = App.fullData; App.lastSeriesIdx = App.idx; var t = App.i18n[App.cfg.lang];
+                document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: #FFD700;"><i class="fas fa-circle-notch fa-spin"></i> '+t.loading_ep+'</div>';
+                this.req(this.creds.h+"/player_api.php?username="+this.creds.u+"&password="+this.creds.p+"&action=get_series_info&series_id="+series_id, function(d) {
+                    if(d && d.episodes) {
+                        var eps = [];
+                        for (var seasonKey in d.episodes) {
+                            var apiSeason = parseInt(seasonKey);
+                            for (var i=0; i<d.episodes[seasonKey].length; i++) {
+                                var ep = d.episodes[seasonKey][i]; var apiEp = parseInt(ep.episode_num); var rawTitle = (ep.title || ep.info.name || "").trim();
+                                var realSeason = apiSeason; var realEp = apiEp; var match = rawTitle.match(/(?:S|T)(\d+)\s*(?:E|EP)(\d+)/i);
+                                if (match) { realSeason = parseInt(match[1]); realEp = parseInt(match[2]); }
+                                var cleanName = rawTitle; if (match) { var index = match.index + match[0].length; cleanName = cleanName.substring(index); }
+                                cleanName = cleanName.replace(/^\s*-\s*/, "").trim(); if (cleanName.length < 2) cleanName = ""; 
+                                ep.is_episode = true; ep.season_num = realSeason; ep.episode_real_num = realEp;
+                                ep.name = "S" + App.pad(realSeason) + " E" + App.pad(realEp); if (cleanName) { ep.name += " - " + cleanName; }
+                                eps.push(ep);
+                            }
+                        }
+                        eps.sort(function(a, b) { if (a.season_num !== b.season_num) { return a.season_num - b.season_num; } return a.episode_real_num - b.episode_real_num; });
+                        App.fullData = eps; App.zone = 2; App.idx = 0; App.renderList();
+                    } else { document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center;">'+t.no_ep+'</div>'; }
+                });
+            },
+
             playStream: function(item) {
-                var id = item.stream_id || item.id; var url = "";
+                var id = item.stream_id || item.id; var url = ""; var t = App.i18n[App.cfg.lang];
                 if (App.currentMode === 'live') {
-                    url = this.creds.h+"/live/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+(this.cfg.format === 'ts_native' ? 'ts' : 'm3u8');
+                    var ext = 'm3u8'; 
+                    if (this.cfg.format === 'ts_native') ext = 'ts'; 
+                    else ext = 'm3u8'; 
+
+                    url = this.creds.h+"/live/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+ext;
+                    this.playingId = id; document.getElementById('meta-title').innerText = item.name || item.title; document.getElementById('meta-desc').innerText = "";
                 } else if (App.currentMode === 'movie') {
-                    url = this.creds.h+"/movie/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+(item.container_extension || 'mp4');
+                    var ext = item.container_extension || 'mp4'; url = this.creds.h+"/movie/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+ext;
+                    this.playingId = id; document.getElementById('meta-title').innerText = item.name || item.title || t.def_movie; document.getElementById('meta-desc').innerText = "";
                 } else if (App.currentMode === 'series') {
-                    url = this.creds.h+"/series/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+(item.container_extension || 'mp4');
+                    var ext = item.container_extension || 'mp4'; url = this.creds.h+"/series/"+this.creds.u+"/"+this.creds.p+"/"+id+"."+ext;
+                    this.playingId = id; document.getElementById('meta-title').innerText = item.name || item.title || t.def_ep; document.getElementById('meta-desc').innerText = "";
                 }
-                this.playingId = id; document.getElementById('meta-title').innerText = item.name || item.title;
                 PlayerEngine.play(url); 
                 var items = document.querySelectorAll('.item'); for(var k=0; k<items.length; k++) { items[k].classList.remove('playing'); }
                 var r = document.getElementById('row-'+this.idx); if(r) r.classList.add('playing'); 
             },
 
-            toggleFull: function() {
-                if(!this.playingId) return; var b = document.getElementById('vid-box');
-                if(b.classList.contains('fs')) { 
-                    b.classList.remove('fs'); try { if (document.exitFullscreen) document.exitFullscreen(); } catch(e) {}
-                } else { 
-                    b.classList.add('fs'); requestNativeFullscreen(b); 
+            seek: function(sec) {
+                if(App.currentMode === 'live') return; // Bloqueado em Live
+                var v = document.getElementById('player');
+                if(v && v.duration) {
+                    v.currentTime += sec;
                 }
+            }, 
+
+            syncFocusToPlaying: function() {
+                if(!this.playingId) return;
+                for(var i=0; i<this.fullData.length; i++) {
+                    var id = this.fullData[i].stream_id || this.fullData[i].series_id || this.fullData[i].id;
+                    if(id == this.playingId) { this.idx = i; this.updateFocus(); return; }
+                }
+            },
+
+            removeAccents: function(s) {
+                if(!s) return ""; var str = s.toLowerCase();
+                str = str.replace(/[áàãâä]/g, 'a'); str = str.replace(/[éèêë]/g, 'e'); str = str.replace(/[íìîï]/g, 'i');
+                str = str.replace(/[óòõôö]/g, 'o'); str = str.replace(/[úùûü]/g, 'u'); str = str.replace(/[ç]/g, 'c');
+                return str;
+            },
+
+            doSearch: function() {
+                var rawT = document.getElementById('search').value; 
+                if(rawT.length === 0) { if(App.lastCatIdx !== undefined) { App.loadContent(App.lastCatIdx); } return; }
+                if(rawT.length < 2) return; 
+                var tStr = App.removeAccents(rawT);
+                document.getElementById('item-list').innerHTML = '<div style="padding:20px; text-align:center; color: #FFD700; font-size: 30px;"><i class="fas fa-circle-notch fa-spin"></i></div>';
+                var actionStrm = App.currentMode === 'live' ? 'get_live_streams' : (App.currentMode === 'movie' ? 'get_vod_streams' : 'get_series');
+                App.req(App.creds.h+"/player_api.php?username="+App.creds.u+"&password="+App.creds.p+"&action="+actionStrm, function(d){ 
+                    if(d && d!=='ERR_NET') { 
+                        var res = []; var maxResults = 100; var junk = ['adulto','xxx','sex','porn','+18','teste','off','expirado','vencido','manutencao','playback'];
+                        for(var i=0; i<d.length; i++) { 
+                            var nome = d[i].name || d[i].title || ""; var show = true;
+                            if(App.cfg.filter) { var lowerNome = nome.toLowerCase(); for(var j=0; j<junk.length; j++) { if(lowerNome.indexOf(junk[j]) > -1) { show = false; break; } } }
+                            if(show && App.removeAccents(nome).indexOf(tStr) > -1) { res.push(d[i]); if(res.length >= maxResults) break; } 
+                        }
+                        d = null; res.sort(App.smartSort);
+                        App.fullData = res; App.page = 0; App.renderList(); App.zone = 2; App.idx = 0; App.updateFocus(); 
+                    }
+                }); 
             },
             
             handleVideoTap: function(e) {
-                e.preventDefault(); if(!App.playingId) return; App.toggleFull();
+                e.preventDefault(); if(!App.playingId) return; 
+                this.zone=3; this.updateFocus();
+                if(App.currentMode !== 'live') {
+                    // Se tocarmos no vídeo em VOD, faz toggle play/pause se já estiver full, ou entra em full
+                    if(document.getElementById('vid-box').classList.contains('fs')) { App.togglePlay(); }
+                    else { App.toggleFull(); }
+                } else {
+                    App.toggleFull(); 
+                }
             },
+            
+            togglePlay: function() { 
+                if(App.currentMode === 'live') return; // Ignora se for Live
+                var v = document.getElementById('player');
+                var layer = document.getElementById('pause-layer');
+                if(!v) return;
+                
+                if(v.paused) {
+                    v.play();
+                    layer.style.display = 'none';
+                } else {
+                    v.pause();
+                    layer.style.display = 'flex';
+                }
+            }, 
 
+            toggleFull: function() {
+                if(!this.playingId) return; var b = document.getElementById('vid-box');
+                if(b.classList.contains('fs')) { this.exitFull(); } else { b.classList.add('fs'); requestNativeFullscreen(b); }
+            },
+            
+            exitFull: function() { 
+                document.getElementById('vid-box').classList.remove('fs'); 
+                document.getElementById('pause-layer').style.display = 'none'; // Garante esconder o pause ao sair
+                try { if (document.exitFullscreen) { document.exitFullscreen(); } else if (document.webkitExitFullscreen) { document.webkitExitFullscreen(); } } catch(e) {}
+                this.syncFocusToPlaying(); 
+            },
+            
             back: function() {
-                if(document.getElementById('vid-box').classList.contains('fs')) { this.toggleFull(); return; }
-                if(this.zone===2) { this.zone=0; this.idx=0; this.updateFocus(); return; }
-                this.setScr(1);
+                if(document.getElementById('vid-box').classList.contains('fs')) { this.exitFull(); return; }
+                if(this.zone===3) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); return; }
+                if(this.zone===2) { 
+                    if(App.currentMode === 'series' && App.fullData.length > 0 && App.fullData[0].is_episode) {
+                        App.fullData = App.seriesDataCache; App.renderList(true); App.idx = App.lastSeriesIdx; App.updateFocus(); return;
+                    }
+                    this.zone=0; this.idx=this.lastCatIdx; this.updateFocus(); return; 
+                }
+                if(this.zone===1) { this.zone=2; this.idx=0; this.updateFocus(); return; }
+                if(this.zone===0) { this.setScr(1); return; }
             },
             
             updateFocus: function() {
                 var focusedItems = document.querySelectorAll('.focused'); for(var k=0; k<focusedItems.length; k++) { focusedItems[k].classList.remove('focused'); }
                 var el;
-                if(this.scr===0) el=document.getElementById('i'+this.idx); if(this.scr===1) el=document.getElementById('m'+this.idx); 
-                if(this.scr===2) { if(this.zone===0) el=document.getElementById('c'+this.idx); if(this.zone===2) el=document.getElementById('row-'+this.idx); }
+                if(this.scr===0) el=document.getElementById('i'+this.idx); if(this.scr===1) el=document.getElementById('m'+this.idx); if(this.scr===3) el=document.getElementById('s'+this.idx);
+                if(this.scr===2) { if(this.zone===0) el=document.getElementById('c'+this.idx); if(this.zone===1) el=document.getElementById('search'); if(this.zone===2) el=document.getElementById('row-'+this.idx); if(this.zone===3) el=document.getElementById('vid-box'); }
                 
                 if(el) { 
                     el.classList.add('focused'); 
+                    if(el.tagName==='INPUT') { el.focus(); } else { var inps = document.querySelectorAll('input'); for(var i=0; i<inps.length; i++) { inps[i].blur(); } el.focus(); } 
+                    
                     if(el.tagName!=='INPUT') {
-                        var p = el.parentElement;
-                        while(p && p !== document.body) {
-                            if(window.getComputedStyle(p).overflowY === 'auto') { p.scrollTop = el.offsetTop - (p.clientHeight / 2) + (el.clientHeight / 2); break; }
-                            p = p.parentElement;
+                        var parentContainer = el.parentElement;
+                        while(parentContainer && parentContainer !== document.body) {
+                            var style = window.getComputedStyle(parentContainer);
+                            if(style.overflowY === 'auto' || style.overflowY === 'scroll') {
+                                try { parentContainer.scrollTo({ top: el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2), behavior: 'smooth' }); } 
+                                catch(e) { parentContainer.scrollTop = el.offsetTop - (parentContainer.clientHeight / 2) + (el.clientHeight / 2); }
+                                break;
+                            }
+                            parentContainer = parentContainer.parentElement;
                         }
                     }
                 }
             },
             
             move: function(d) {
+                if(this.scr===0) { if(d===1 && this.idx < 3) this.idx++; if(d===0 && this.idx > 0) this.idx--; }
+                if(this.scr===1) { 
+                    if(this.idx === 0) { if(d===3) this.idx=1; else if(d===0) this.idx=3; }
+                    else if(this.idx === 1) { if(d===3) this.idx=2; else if(d===2) this.idx=0; else if(d===0) this.idx=3; }
+                    else if(this.idx === 2) { if(d===2) this.idx=1; else if(d===0) this.idx=3; }
+                    else if(this.idx === 3) { if(d===3) this.idx=4; else if(d===1) this.idx=0; }
+                    else if(this.idx === 4) { if(d===2) this.idx=3; else if(d===1) this.idx=2; }
+                }
+                if(this.scr===3) { 
+                    if(this.idx === 0) { if(d===1) this.idx = 1; } 
+                    else if(this.idx === 1) { if(d===1) this.idx = 2; else if(d===0) this.idx = 0; }
+                    else if(this.idx === 2) { if(d===3) this.idx = 3; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; }
+                    else if(this.idx === 3) { if(d===2) this.idx = 2; else if(d===1) this.idx = 4; else if(d===0) this.idx = 1; }
+                    else if(this.idx === 4) { if(d===0) this.idx = 2; }
+                }
                 if(this.scr===2) {
-                    if(this.zone===0) { if(d===1) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3) { this.zone=2; this.idx=0; } }
+                    if(this.zone===3) { if(d===2) { this.zone=2; this.syncFocusToPlaying(); this.updateFocus(); } return; }
+                    if(this.zone===0) { var max = document.getElementById('cat-list').children.length-1; if(d===1 && this.idx<max) this.idx++; if(d===0 && this.idx>0) this.idx--; if(d===3 && App.fullData.length>0) { this.zone=2; this.idx=0; } }
                     else if(this.zone===2) { 
-                        if(d===1 && this.idx < this.fullData.length - 1) this.idx++; 
-                        if(d===0 && this.idx > 0) this.idx--; 
-                        if(d===2) this.zone=0; 
+                        var dataLen = App.fullData.length;
+                        if(d===1) { if(typeof this.idx === 'number' && this.idx < Math.min(dataLen, 1000) - 1) { this.idx++; } }
+                        else if(d===0) { if(typeof this.idx === 'number' && this.idx > 0) { this.idx--; } else if(this.idx === 0) { this.zone = 1; } } 
+                        else if(d===2) { this.zone=0; this.idx=this.lastCatIdx; } else if(d===3) { this.zone=3; }
                     }
+                    else if(this.zone===1) { if(d===1) { this.zone=2; this.idx=0; } if(d===2) { this.zone=0; this.idx=this.lastCatIdx; } }
                 }
                 this.updateFocus();
             },
 
             enter: function() {
-                if(this.scr===2) { if(this.zone===0) this.catClick(this.idx); if(this.zone===2) this.itemClick(this.idx); }
+                var now = new Date().getTime(); if(now - this.lastEnter < 400) return; this.lastEnter = now;
+                if(this.scr===0) { if(this.idx === 3) this.login(false); else if(this.idx < 3) this.move(1); }
+                if(this.scr===1) { 
+                    if(this.idx === 4) this.logout(); else if(this.idx === 3) this.openSettings(); 
+                    else if(this.idx === 0) this.openMode('live'); else if(this.idx === 1) this.openMode('movie'); else if(this.idx === 2) this.openMode('series');
+                }
+                if(this.scr===3) { if(this.idx === 1) this.toggleLang(); if(this.idx === 2) this.toggleCfg('filter'); if(this.idx === 3) this.toggleFormat(); if(this.idx === 4) this.closeSettings(); }
+                if(this.scr===2) {
+                    if(this.zone===0) this.catClick(this.idx); if(this.zone===1) this.doSearch();
+                    if(this.zone===2) { App.clickItem(); } if(this.zone===3) this.toggleFull(); 
+                }
             }
         };
 
         document.addEventListener('keydown', function(e) {
             var k=e.keyCode;
-            if(k===37) { e.preventDefault(); App.move(2); } if(k===38) { e.preventDefault(); App.move(0); } 
-            if(k===39) { e.preventDefault(); App.move(3); } if(k===40) { e.preventDefault(); App.move(1); }
+            if(document.activeElement && document.activeElement.tagName === 'INPUT' && App.scr === 0) { if(k === 13 || k === 40) { e.preventDefault(); App.move(1); return; } if(k === 38) { e.preventDefault(); App.move(0); return; } return; }
+            if(App.scr === 2 && document.activeElement && document.activeElement.tagName === 'INPUT') { if(k === 13) { App.doSearch(); return; } if(k === 40) { e.preventDefault(); App.zone=2; App.idx=0; App.updateFocus(); return; } return; }
+            if(k===48 || k===96) { if(App.scr===2 && App.zone===2) { var it=App.fullData[App.idx]; if(it) { var itId = it.stream_id || it.series_id || it.id; FavManager.toggle(itId); } } }
+            
+            // === CONTROLES PARA VOD (FILMES/SERIES) ===
+            var isVOD = (App.currentMode !== 'live' && App.scr === 2);
+            var isFull = document.getElementById('vid-box').classList.contains('fs');
+
+            if(isVOD) {
+                if(k===415 || k===179 || k===19) { e.preventDefault(); App.togglePlay(); return; } // Play/Pause
+                if(k===412 || k===227) { e.preventDefault(); App.seek(-15); return; } // Rewind 15s
+                if(k===417 || k===228) { e.preventDefault(); App.seek(15); return; } // Forward 15s
+                // Enter/OK no fullscreen VOD faz toggle play
+                if(k===13 && isFull) { e.preventDefault(); App.togglePlay(); return; }
+            }
+
+            if(isFull) { 
+                e.preventDefault(); 
+                // Permite sair com botões padrão
+                if(k===403||k===82||k===27||k===461||k===10009) { App.exitFull(); return; }
+                // Setas em Fullscreen VOD fazem seek
+                if(isVOD) {
+                    if(k===37) { App.seek(-15); return; } // Esquerda
+                    if(k===39) { App.seek(15); return; } // Direita
+                }
+                return; 
+            }
+            // ===============================================
+
+            if(k===37) { e.preventDefault(); App.move(2); } if(k===38) { e.preventDefault(); App.move(0); } if(k===39) { e.preventDefault(); App.move(3); } if(k===40) { e.preventDefault(); App.move(1); }
             if(k===13) { e.preventDefault(); App.enter(); } 
-            if(k===8||k===27||k===10009) { e.preventDefault(); if(App.scr>0) App.back(); }
+            if(k===8||k===27||k===461||k===10009) { e.preventDefault(); if(App.scr===3) { App.closeSettings(); return; } else if(App.scr>0) { App.back(); return; } }
+            if(k===403||k===82) if(App.scr===2) App.toggleFull(); 
+            if(k===404||k===71) if(App.scr===2) { App.zone=0; App.idx=0; App.updateFocus(); } 
+            if(k===405||k===89) if(App.scr===2) { App.zone=1; App.updateFocus(); } 
+            if(k===406||k===66||k===275) { e.preventDefault(); App.setScr(1); } 
         });
+
+        function forceDisconnect() { PlayerEngine.hardStop(); }
+        window.addEventListener('beforeunload', forceDisconnect); window.addEventListener('unload', forceDisconnect); window.addEventListener('pagehide', forceDisconnect);
+        document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'hidden') { forceDisconnect(); } });
     </script>
 </body>
 </html>
